@@ -7,7 +7,7 @@ require("beautiful")
 -- Notification library
 require("naughty")
 -- Widget Library
-require("vicious")
+vicious = require("vicious")
 
 -- Compiz Expose like
 require("revelation")

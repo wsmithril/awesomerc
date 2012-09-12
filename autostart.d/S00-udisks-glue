@@ -1,0 +1,10 @@
+#! /bin/bash
+
+lock_file="/tmp/awesome-udisks-glue.lock"
+trap "rm -f $lock_file" HUP INT QUIT ILL TRAP KILL BUS TERM
+
+if [ ! -e "$lock_file" ] ; then
+    touch $lock_file
+    exec udisks-glue -c ~/.config/awesome/udisk-glue.conf
+fi
+

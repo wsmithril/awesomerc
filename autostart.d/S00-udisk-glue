@@ -1,3 +1,0 @@
-#! /bin/bash
-
-exec udisks-glue -c ~/.config/awesome/udisk-glue.conf

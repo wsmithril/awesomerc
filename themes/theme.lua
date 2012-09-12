@@ -5,7 +5,7 @@ config_dir = ".config/awesome/themes/"
 
 -- {{{ Main
 theme = {}
-theme.wallpaper_cmd = { "awsetbg" .. config_dir .. "zenburn-background.png" }
+theme.wallpaper_cmd = { "awsetbg " .. config_dir .. "zenburn-background.png" }
 -- }}}
 
 -- {{{ Styles
