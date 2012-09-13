@@ -1,0 +1,8 @@
+#! /bin/bash
+
+case $1 in
+    start) 
+        exec compton -c -fF -I-1 -O-1 -D1 ;;
+    stop) ;;
+esac
+

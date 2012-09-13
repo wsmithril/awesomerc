@@ -97,8 +97,9 @@ end
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 menu_awesome = {
-   { "Edit Config", editor_cmd .. " " .. awesome.conffile }
- , { "Restart", awesome.restart }
+    { "Edit Config", editor_cmd .. " " .. awesome.conffile }
+  , { "Restart", awesome.restart }
+  , { "Quit", awesome.quit }
 }
 
 menu_mainmenu = awful.menu( {
@@ -131,6 +132,12 @@ vicious.register(netwidget, vicious.widgets.net, '<span color="#CC9393">${wlan0 
 -- }}}
 
 --- {{{ volume control widget
+function ran_and_wait(cmd)
+    local fd = io.popen(cmd)
+    fd:read("*all")
+    fd:close()
+end
+
 volume_sID = "Master"
 function volume_control(action)
     if action == "status" then
@@ -146,21 +153,21 @@ function volume_control(action)
         status = string.match(status, "%[(%d?%d?%d)%%%]")
         return tonumber(status)
     elseif action == "mute" then
-        io.popen("amixer -q sset " .. volume_sID .. " mute"):read("*all")
+        ran_and_wait("amixer -q sset " .. volume_sID .. " mute")
     elseif action == "unmute" then
-        io.popen("amixer -q sset " .. volume_sID .. " unmute"):read("*all")
+        ran_and_wait("amixer -q sset " .. volume_sID .. " unmute")
     elseif action == "up" then
-        io.popen("amixer -q sset " .. volume_sID .. " 10%+ unmute"):read("*all")
+        ran_and_wait("amixer -q sset " .. volume_sID .. " 10%+ unmute")
     elseif action == "down" then
-        io.popen("amixer -q sset " .. volume_sID .. " 10%- unmute"):read("*all")
+        ran_and_wait("amixer -q sset " .. volume_sID .. " 10%- unmute")
     elseif action == "toggle" then
-        io.popen("amixer -q sset " .. volume_sID .. " " 
-            .. (volume_control("status") == "on" and "mute" or "unmute")):read("*all")
+        ran_and_wait("amixer -q sset " .. volume_sID .. " " 
+            .. (volume_control("status") == "on" and "mute" or "unmute"))
     end
 end
 
 widget_volume = widget({ type = "textbox", name = "widget_volume", align = "right"})
-widget_volume.width = 50
+widget_volume.width = 48
 widget_volume:buttons(awful.util.table.join(
     awful.button({ }, 4, function () volume_control("up")     update_volume_widget(widget_volume) end)
   , awful.button({ }, 1, function () volume_control("toggle") update_volume_widget(widget_volume) end)
@@ -195,11 +202,11 @@ widget_layout = {}
 widget_taglist = {}
 widget_taglist.buttons = awful.util.table.join(
     awful.button({ }, 1, awful.tag.viewonly)
- ,  awful.button({ modkey }, 1, awful.client.movetotag)
- ,  awful.button({ }, 3, awful.tag.viewtoggle)
- ,  awful.button({ modkey }, 3, awful.client.toggletag)
- ,  awful.button({ }, 5, awful.tag.viewnext)
- ,  awful.button({ }, 4, awful.tag.viewprev)
+  , awful.button({ modkey }, 1, awful.client.movetotag)
+  , awful.button({ }, 3, awful.tag.viewtoggle)
+  , awful.button({ modkey }, 3, awful.client.toggletag)
+  , awful.button({ }, 5, awful.tag.viewnext)
+  , awful.button({ }, 4, awful.tag.viewprev)
 )
 
 widget_tasklist = {}
@@ -254,7 +261,7 @@ for s = 1, screen.count() do
         widget_tasklist.buttons)
 
     -- Create the wibox
-    wibox_main[s] = awful.wibox({ position = "top", screen = s })
+    wibox_main[s] = awful.wibox({ position = "top", screen = s, height = 32})
     -- Add widgets to the wibox - order matters
     wibox_main[s].widgets = {
         {   launcher_main
@@ -320,7 +327,7 @@ globalkeys = awful.util.table.join(
   , awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end)
   , awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end)
 
-  , awful.key({ modkey, "Control" }, "n", awful.client.restore)
+--  , awful.key({ modkey, "Control" }, "n", awful.client.restore)
 
     -- Prompt
   , awful.key({ modkey },            "r",     function () widget_prompt[mouse.screen]:run() end)
@@ -336,6 +343,8 @@ globalkeys = awful.util.table.join(
     -- compiz expose like
   , awful.key({ modkey }, "b", revelation)
 
+    -- start nautilus
+  , awful.key({ modkey }, "n", function () awful.util.spawn("nautilus --no-desktop") end)
     -- media keys
   , awful.key({}, "XF86AudioMute",        function () volume_control("toggle") update_volume_widget(widget_volume) end)
   , awful.key({}, "XF86AudioLowerVolume", function () volume_control("down")   update_volume_widget(widget_volume) end)
@@ -422,7 +431,11 @@ awful.rules.rules = {
       , border_color = beautiful.border_normal
       , focus        = true
       , keys         = clientkeys
-      , buttons      = clientbuttons } }
+      , size_hints_honor = false
+      , buttons      = clientbuttons } 
+    , callback = function (c) 
+            naughty.notify({ title = c.name .. " Started", presets = naughty.config.presets.normal, timeout = 2, icon = c.icon })
+        end}
 
     -- Fire and Pidgin on tag[1][2], horizenily side by side 
   , { rule = { class = "Firefox", role = "browse" },
@@ -456,4 +469,5 @@ awful.rules.rules = {
 -- {{{ autostart
 awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh")
 -- }}}
+
 -- vim: set foldmethod=marker:
