@@ -42,8 +42,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
--- beautiful.init("/usr/share/awesome/themes/default/theme.lua")
-beautiful.init(awful.util.getdir("config") .. "/themes/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/nice-and-clean-theme/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "terminator"
@@ -467,7 +466,10 @@ awful.rules.rules = {
 -- }}}
 
 -- {{{ autostart
-awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh")
--- }}}
+awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh start")
+-- }}} 
 
+-- {{{ auto stop
+ awesome.add_signal("exit", function() awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh stop") end)
+-- }}}
 -- vim: set foldmethod=marker:

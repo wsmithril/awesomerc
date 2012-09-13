@@ -1,8 +1,44 @@
 #! /bin/bash
 
+cmd="compton -c -fF -I-1 -O-1 -D1.7"
+
+sc_name=$(basename $0)
+pidfile_dir=/tmp/awesome-autostart
+
+trap "rm -f $pidfile_dir" HUP INT QUIT ILL TRAP KILL BUS TERM
+
+_start() {
+    $cmd &
+    pid=$!
+    echo $pid > $pidfile_dir/$sc_name
+}
+
+_started() {
+    [ ! -e $pidfile_dir/$sc_name ] && return 1
+    pid=$( cat $pidfile_dir/$sc_name )
+    prog=${cmd%% *}
+    pgrep $prog | grep $pid > /dev/null 2>&1
+    return $!
+}
+
+_start_once() {
+    _started || _start
+}
+
+_stop() {
+    pid=$( cat $pidfile_dir/$sc_name )
+    _started && kill -TERM $pid
+}
+
+_restart() {
+    _started && _stop
+    _start
+}
+
 case $1 in
-    start) 
-        exec compton -c -fF -I-1 -O-1 -D1 ;;
-    stop) ;;
+    start)  _restart ;;
+    stop)   _stop ;;
+    status) _started ;;
+    *) ;;
 esac
 

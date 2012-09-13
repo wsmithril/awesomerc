@@ -1,15 +1,47 @@
 #! /bin/bash
 
-lock_file="/tmp/awesome-udisks-glue.lock"
-trap "rm -f $lock_file" HUP INT QUIT ILL TRAP KILL BUS TERM
+cfg_file=~/.config/awesome/udisk-glue.conf
+cmd="udisks-glue -c $cfg_file"
 
-case $1 in 
-    start)
-        if [ ! -e "$lock_file" ] ; then
-            touch $lock_file
-            exec udisks-glue -c ~/.config/awesome/udisk-glue.conf
-        fi
-        ;;
-    stop) rm -f $locfile ;;
+sc_name=$(basename $0)
+pidfile_dir=/tmp/awesome-autostart
+
+trap "rm -f $pidfile_dir" HUP INT QUIT ILL TRAP KILL BUS TERM
+
+_start() {
+    $cmd &
+    pid=$!
+    echo $pid > $pidfile_dir/$sc_name
+}
+
+_started() {
+    [ ! -e $pidfile_dir/$sc_name ] && return 1
+    pid=$( cat $pidfile_dir/$sc_name )
+    echo "PID: $pid, FILE: $sc_name"
+    prog=${cmd%% *}
+    pgrep $prog | grep $pid > /dev/null 2>&1
+    return $!
+}
+
+_start_once() {
+    _started || _start
+}
+
+_stop() {
+    pid=$( cat $pidfile_dir/$sc_name )
+    _started && kill -TERM $pid
+}
+
+_restart() {
+    _started && _stop
+    _start
+}
+
+case $1 in
+    start)  _restart ;;
+    stop)   _stop ;;
+    status) _started ;;
+    *) ;;
 esac
+
 
