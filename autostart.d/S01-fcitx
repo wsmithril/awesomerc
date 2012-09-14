@@ -1,7 +1,6 @@
 #! /bin/bash
 
-cfg_file=~/.config/awesome/udisk-glue.conf
-cmd="udisks-glue -c $cfg_file --foreground"
+cmd="fcitx -D"
 
 sc_name=$(basename $0)
 pidfile_dir=/tmp/awesome-autostart
@@ -42,5 +41,4 @@ case $1 in
     status) _started ;;
     *) ;;
 esac
-
 

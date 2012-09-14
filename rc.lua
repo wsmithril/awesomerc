@@ -12,6 +12,10 @@ vicious = require("vicious")
 -- Compiz Expose like
 require("revelation")
 
+-- freedesktop.org menu
+require("freedesktop.utils")
+require("freedesktop.menu")
+
 os.setlocale("zh_CN.utf-8")
 
  -- {{{ Error handling
@@ -73,7 +77,7 @@ layouts = {
   , awful.layout.suit.max.fullscreen
   , awful.layout.suit.magnifier
 }
--- }}}
+-- }}} 
 
 -- {{{ Tags
 -- Define a tag table which will hold all screen tags.
@@ -95,6 +99,11 @@ end
 
 -- {{{ Menu
 -- Create a laucher widget and a main menu
+freedesktop.utils.icon_theme = { 'elementary', 'gnome', 'default' }
+freedesktop.utils.terminal = 'sakura'
+
+freedesktop_menu = freedesktop.menu.new()
+
 menu_awesome = {
     { "Edit Config", editor_cmd .. " " .. awesome.conffile }
   , { "Restart", awesome.restart }
@@ -104,6 +113,7 @@ menu_awesome = {
 menu_mainmenu = awful.menu( {
     items = {
         { "Awesome", menu_awesome, beautiful.awesome_icon }
+      , { "Applications", freedesktop_menu }
       , { "Open Terminal", terminal }
     }
 })
@@ -166,7 +176,6 @@ function volume_control(action)
 end
 
 widget_volume = widget({ type = "textbox", name = "widget_volume", align = "right"})
-widget_volume.width = 48
 widget_volume:buttons(awful.util.table.join(
     awful.button({ }, 4, function () volume_control("up")     update_volume_widget(widget_volume) end)
   , awful.button({ }, 1, function () volume_control("toggle") update_volume_widget(widget_volume) end)
@@ -272,9 +281,8 @@ for s = 1, screen.count() do
       , netwidget
       , widget_textclock
       , widget_seperator
-      , s == 1 and widget_systray or nil
       , widget_volume
-      , widget_seperator
+      , s == 1 and widget_systray or nil
       , widget_tasklist[s]
       , layout = awful.widget.layout.horizontal.rightleft
     }
@@ -426,7 +434,7 @@ root.keys(globalkeys)
 awful.rules.rules = {
     -- All clients will match this rule.
     { rule = { }, properties = { 
-        border_width = beautiful.border_width
+        border_width = 0
       , border_color = beautiful.border_normal
       , focus        = true
       , keys         = clientkeys
@@ -469,7 +477,8 @@ awful.rules.rules = {
 awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh start")
 -- }}} 
 
--- {{{ auto stop
+-- {{{ autostop
  awesome.add_signal("exit", function() awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh stop") end)
--- }}}
+-- }}} 
+
 -- vim: set foldmethod=marker:

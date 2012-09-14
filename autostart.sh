@@ -5,10 +5,11 @@ lockfile_dir=/tmp/awesome-autostart
 
 # prepare pidfile dir
 [ ! -e $lockfile_dir ] && ( mkdir -p $lockfile_dir || \
-    echo 'naughty.notify({title="Autostart:",text="Unable to create autostart pidfile dir",timeout=10,present=naughty.config.presents.critical}))' | awesome-client && exit 1)
+    echo 'naughty.notify({title="Autostart:",text="Unable to create autostart pidfile dir",timeout=10,preset=naughty.config.presets.critical})' | awesome-client && exit 1)
 
 start_all() {
     for script in $config_dir/autostart.d/S* ; do
+        echo "naughty.notify({title=\"Autostart:\",text=\"Starting \" .. \"$script\" .. \"...\",timeout=2,preset=naughty.config.presets.normal})" | awesome-client
         $script start &
     done
 }
