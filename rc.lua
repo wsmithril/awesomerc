@@ -47,6 +47,30 @@ function format_byte(byte)
     if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "G" end
     return string.format("%3.1f%s", byte, unit)
 end
+
+function gradient(color, to_color, min, max, value)
+    local function color2dec(c)
+        return tonumber(c:sub(2,3),16), tonumber(c:sub(4,5),16), tonumber(c:sub(6,7),16)
+    end
+
+    local factor = 0
+    if (value >= max ) then 
+        factor = 1  
+    elseif (value > min ) then 
+        factor = (value - min) / (max - min)
+    end 
+
+    local red, green, blue = color2dec(color) 
+    local to_red, to_green, to_blue = color2dec(to_color) 
+
+    red   = red   + (factor * (to_red   - red))
+    green = green + (factor * (to_green - green))
+    blue  = blue  + (factor * (to_blue  - blue))
+
+    -- dec2color
+    return string.format("#%02x%02x%02x", red, green, blue)
+end
+
 -- }}}
 
  -- {{{ Error handling
@@ -204,15 +228,20 @@ end
 old_net_status = nil
 
 function update_net_widget(w)
-    local text = ""
+    local text = "" 
+    local line, rx, tx
+    local rx_max = 360 * 1024
+    local tx_max = 100 * 1024
     local s = net_status()
     if old_net_status == nil then old_net_status = s end
     for k, v in pairs(s) do
         if v.status == "up" then
-            line = k .. ' <span color="#CC9393">↓' .. format_byte((v.rx - old_net_status[k].rx) / update_interval) .. 'B/s </span>' 
-                     .. ' <span color="#7F9F7F">↑' .. format_byte((v.tx - old_net_status[k].tx) / update_interval) .. 'B/s </span>'
+            rx = old_net_status[k] and (v.rx - old_net_status[k].rx) / update_interval or 0
+            tx = old_net_status[k] and (v.tx - old_net_status[k].tx) / update_interval or 0
+            line = k .. ' <span color="' .. gradient("#CCA0A0", "#CC3030", 0, rx_max, rx) .. '">↓' .. format_byte(rx) .. 'B/s</span>' 
+                     .. ' <span color="' .. gradient("#93CC93", "#30CC30", 0, tx_max, tx) .. '">↑' .. format_byte(tx) .. 'B/s</span>'
         else
-            line = k .. ' <span color="#B0B0B0">--- </span>'
+            line = k .. ' <span color="#D0D0D0">---</span>'
         end
         text = text .. "|" .. line
     end
@@ -224,7 +253,7 @@ widget_net = widget({ type = "textbox" })
 timer_widget_update:add_signal("timeout", function () update_net_widget(widget_net) end)
 -- }}}
 
---- {{{ volume control widget
+-- {{{ volume control widget
 function ran_and_wait(cmd)
     local fd = io.popen(cmd)
     fd:read("*all")
