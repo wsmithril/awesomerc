@@ -49,7 +49,7 @@ end
 beautiful.init(awful.util.getdir("config") .. "/themes/nice-and-clean-theme/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "terminator"
+terminal = "sakura"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = "gvim"
 
@@ -78,6 +78,10 @@ layouts = {
   , awful.layout.suit.magnifier
 }
 -- }}} 
+
+-- set opaticy of notifications
+naughty.config.presets.normal.opacity = 0.8
+naughty.config.presets.low.opacity = 0.8
 
 -- {{{ Tags
 -- Define a tag table which will hold all screen tags.
@@ -124,20 +128,19 @@ launcher_main = awful.widget.launcher({
 })
 -- }}}
 
--- {{{ Wibox
--- Create a textclock widget
-widget_textclock = awful.widget.textclock({ align = "right" })
+-- {{{ Widget
+-- {{{ text clock
+widget_textclock = awful.widget.textclock()
+-- }}}
 
--- seperator
+-- {{{ seperator
 widget_seperator = widget({ type = "textbox" })
 widget_seperator.text = "|"
+--- }}}
 
 --  Network usage widget {{{
--- Initialize widget
-netwidget = widget({ type = "textbox" })
--- Register widget
-vicious.register(netwidget, vicious.widgets.net, '<span color="#CC9393">${wlan0 down_kb}</span> <span color="#7F9F7F">${wlan0 up_kb}</span>', 3)
-
+widget_net = widget({ type = "textbox" })
+vicious.register(widget_net, vicious.widgets.net, '<span color="#CC9393">↓${wlan0 down_kb}</span> <span color="#7F9F7F">↑${wlan0 up_kb} </span>', 3)
 -- }}}
 
 --- {{{ volume control widget
@@ -175,7 +178,7 @@ function volume_control(action)
     end
 end
 
-widget_volume = widget({ type = "textbox", name = "widget_volume", align = "right"})
+widget_volume = widget({ type = "textbox", name = "widget_volume" })
 widget_volume:buttons(awful.util.table.join(
     awful.button({ }, 4, function () volume_control("up")     update_volume_widget(widget_volume) end)
   , awful.button({ }, 1, function () volume_control("toggle") update_volume_widget(widget_volume) end)
@@ -186,7 +189,7 @@ function update_volume_widget(w)
     local status = volume_control("status")
     local vol    = volume_control("volume")
     if status == "on" and (vol > 0) then
-        w.text = string.format("% 3d", vol) .. "%"
+        w.text = string.format("♪%3d", vol) .. "%"
     else
         w.text = '<span color="red">---M</span>'
     end
@@ -197,16 +200,25 @@ volume_control_clock:add_signal("timeout", function () update_volume_widget(widg
 volume_control_clock:start()
 
 update_volume_widget(widget_volume)
-
 --- }}}
 
--- Create a systray
-widget_systray = widget({ type = "systray" })
+-- {{{ CPU usage and temp
+-- CPU widget
+widget_cpu = widget({ type = "textbox" })
+vicious.register(widget_cpu, vicious.widgets.cpu, function (widget, args) return string.format(" ☢ %3d%%", tonumber(args[1])) end)
+widget_cpu.width = 48
 
--- Create a wibox for each screen and add it
-wibox_main = {}
-widget_prompt = {}
-widget_layout = {}
+-- CPU temperature widget
+widget_cputemp = widget({ type = "textbox" })
+vicious.register(widget_cputemp, vicious.widgets.thermal, function (widget, args) return args[1] .. "°C" end, 19, "thermal_zone0" )
+widget_cputemp.width = 32
+-- }}}
+
+-- {{{ systray
+widget_systray = widget({ type = "systray" })
+-- }}}
+
+-- {{{ taglist buttons
 widget_taglist = {}
 widget_taglist.buttons = awful.util.table.join(
     awful.button({ }, 1, awful.tag.viewonly)
@@ -216,7 +228,9 @@ widget_taglist.buttons = awful.util.table.join(
   , awful.button({ }, 5, awful.tag.viewnext)
   , awful.button({ }, 4, awful.tag.viewprev)
 )
+-- }}}
 
+-- {{{ tasklist buttons
 widget_tasklist = {}
 widget_tasklist.buttons = awful.util.table.join(
     awful.button({ }, 1,
@@ -246,6 +260,13 @@ widget_tasklist.buttons = awful.util.table.join(
         function () awful.client.focus.byidx(1) if client.focus then client.focus:raise() end end)
   , awful.button({ }, 4, 
         function () awful.client.focus.byidx(-1) if client.focus then client.focus:raise() end end))
+-- }}}
+
+-- {{{ wibox 
+wibox_main = {}
+wibox_status = {}
+widget_prompt = {}
+widget_layout = {}
 
 for s = 1, screen.count() do
     -- Create a promptbox for each screen
@@ -269,7 +290,8 @@ for s = 1, screen.count() do
         widget_tasklist.buttons)
 
     -- Create the wibox
-    wibox_main[s] = awful.wibox({ position = "top", screen = s, height = 32})
+    wibox_main[s]   = awful.wibox({ position = "top", screen = s, height = 32})
+
     -- Add widgets to the wibox - order matters
     wibox_main[s].widgets = {
         {   launcher_main
@@ -278,15 +300,18 @@ for s = 1, screen.count() do
           , layout = awful.widget.layout.horizontal.leftright
         }
       , widget_layout[s]
-      , netwidget
       , widget_textclock
-      , widget_seperator
+      , widget_cputemp
+      , widget_cpu
       , widget_volume
+      , widget_net
+      , widget_seperator
       , s == 1 and widget_systray or nil
       , widget_tasklist[s]
       , layout = awful.widget.layout.horizontal.rightleft
     }
 end
+-- }}}
 -- }}}
 
 -- {{{ Mouse bindings
@@ -325,12 +350,12 @@ globalkeys = awful.util.table.join(
   , awful.key({ modkey, "Control" }, "r", awesome.restart)
   , awful.key({ modkey, "Shift"   }, "q", awesome.quit)
 
-  , awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end)
-  , awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end)
-  , awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1)      end)
-  , awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end)
-  , awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end)
-  , awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end)
+  --, awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end
+  --, awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end)
+  --, awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1)      end)
+  --, awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end)
+  --, awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end)
+  --, awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end)
   , awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end)
   , awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end)
 
@@ -356,6 +381,8 @@ globalkeys = awful.util.table.join(
   , awful.key({}, "XF86AudioMute",        function () volume_control("toggle") update_volume_widget(widget_volume) end)
   , awful.key({}, "XF86AudioLowerVolume", function () volume_control("down")   update_volume_widget(widget_volume) end)
   , awful.key({}, "XF86AudioRaiseVolume", function () volume_control("up")     update_volume_widget(widget_volume) end)
+    -- lock screen with WIN+l
+  , awful.key({ modkey }, "l", function () awful.util.spawn("slock") end)
 )
 
 clientkeys = awful.util.table.join(
@@ -377,6 +404,8 @@ clientkeys = awful.util.table.join(
             c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
         end)
+  , awful.key({ modkey }, "Up", function (c) c.maximized_vertical = not c.maximized_vertical end)
+
 )
 
 -- Compute the maximum number of digit we need, limited to 9
@@ -468,8 +497,18 @@ awful.rules.rules = {
         , width = 1920 - 1280
         , x = 1280 },
       callback   = awful.client.setslave }
+    -- sakura terminal
+  , { rule = { class = "Sakura" }, 
+      properties = { floating = true, ontop = true, opacity = 0.8 }}
     -- Flash Full screen
-  , { rule = { class = "Exe"}, properties = {floating = true } }
+  , { rule = { class = "Plugin-container"}, properties = {floating = true, fullscreen = true } }
+    -- Deadbeef
+  , { rule = {class = "Deadbeef" },
+      properties = { 
+            maximized_vertical = true
+          , float = true
+          , x = 920
+          , width = 1000 }}
 }
 -- }}}
 
@@ -478,7 +517,7 @@ awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh start"
 -- }}} 
 
 -- {{{ autostop
- awesome.add_signal("exit", function() awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh stop") end)
+awesome.add_signal("exit", function() awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh stop") end)
 -- }}} 
 
 -- vim: set foldmethod=marker:
