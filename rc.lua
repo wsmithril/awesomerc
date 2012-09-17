@@ -15,8 +15,39 @@ require("revelation")
 -- freedesktop.org menu
 require("freedesktop.utils")
 require("freedesktop.menu")
+lfs = require("lfs")
 
 os.setlocale("zh_CN.utf-8")
+
+-- {{{ usful functions 
+function id(x)
+    return x
+end
+
+function all(f, x, ...)
+    if ... == nil then
+        return f(x)
+    else 
+        return f(x) and all(f, ...)
+    end
+end
+
+function any(f, x, ...)
+    if ... == nil then
+        return f(x)
+    else 
+        return f(x) or any(f, ...)
+    end
+end
+
+function format_byte(byte)
+    local unit = ""
+    if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "k" end
+    if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "M" end
+    if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "G" end
+    return string.format("%3.1f%s", byte, unit)
+end
+-- }}}
 
  -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -77,11 +108,11 @@ layouts = {
   , awful.layout.suit.max.fullscreen
   , awful.layout.suit.magnifier
 }
--- }}} 
 
 -- set opaticy of notifications
 naughty.config.presets.normal.opacity = 0.8
 naughty.config.presets.low.opacity = 0.8
+-- }}} 
 
 -- {{{ Tags
 -- Define a tag table which will hold all screen tags.
@@ -129,6 +160,10 @@ launcher_main = awful.widget.launcher({
 -- }}}
 
 -- {{{ Widget
+-- widget update timer
+update_interval = 3
+timer_widget_update = timer({ timeout = update_interval })
+
 -- {{{ text clock
 widget_textclock = awful.widget.textclock()
 -- }}}
@@ -139,8 +174,54 @@ widget_seperator.text = "|"
 --- }}}
 
 --  Network usage widget {{{
+function net_status()
+    -- return table of network status
+    local base_dir = "/sys/class/net"
+    local ret = {}
+    for dev in lfs.dir(base_dir) do
+        if any(function (p) return string.match(dev, p) end, "wlan%d+", "p2p%d+", "eth%d+", "em%d+") then
+            local fd, status, rx, tx
+            fd = io.open(base_dir .. '/' .. dev .. '/operstate')
+            status = fd:read("*l")
+            fd:close()
+            if status == "up" then
+                fd = io.open(base_dir .. '/' .. dev .. '/statistics/rx_bytes')
+                rx = fd:read("*l")
+                fd:close()
+                fd = io.open(base_dir .. '/' .. dev .. '/statistics/tx_bytes')
+                tx = fd:read("*l")
+                fd:close()
+            else
+                rx = 0
+                tx = 0
+            end
+            ret[dev] = { status = status, rx = tonumber(rx), tx = tonumber(tx) }
+        end
+    end
+    return ret
+end
+
+old_net_status = nil
+
+function update_net_widget(w)
+    local text = ""
+    local s = net_status()
+    if old_net_status == nil then old_net_status = s end
+    for k, v in pairs(s) do
+        if v.status == "up" then
+            line = k .. ' <span color="#CC9393">↓' .. format_byte((v.rx - old_net_status[k].rx) / update_interval) .. 'B/s </span>' 
+                     .. ' <span color="#7F9F7F">↑' .. format_byte((v.tx - old_net_status[k].tx) / update_interval) .. 'B/s </span>'
+        else
+            line = k .. ' <span color="#B0B0B0">--- </span>'
+        end
+        text = text .. "|" .. line
+    end
+    w.text = text
+    old_net_status = s
+end
+
 widget_net = widget({ type = "textbox" })
-vicious.register(widget_net, vicious.widgets.net, '<span color="#CC9393">↓${wlan0 down_kb}</span> <span color="#7F9F7F">↑${wlan0 up_kb} </span>', 3)
+timer_widget_update:add_signal("timeout", function () update_net_widget(widget_net) end)
 -- }}}
 
 --- {{{ volume control widget
@@ -195,10 +276,7 @@ function update_volume_widget(w)
     end
 end
 
-volume_control_clock = timer({ timeout = 3 })
-volume_control_clock:add_signal("timeout", function () update_volume_widget(widget_volume) end)
-volume_control_clock:start()
-
+timer_widget_update:add_signal("timeout", function () update_volume_widget(widget_volume) end)
 update_volume_widget(widget_volume)
 --- }}}
 
@@ -260,6 +338,7 @@ widget_tasklist.buttons = awful.util.table.join(
         function () awful.client.focus.byidx(1) if client.focus then client.focus:raise() end end)
   , awful.button({ }, 4, 
         function () awful.client.focus.byidx(-1) if client.focus then client.focus:raise() end end))
+
 -- }}}
 
 wibox_main = {}
@@ -307,17 +386,19 @@ for s = 1, screen.count() do
     wibox_status[s].widgets = {
         {   launcher_main
           , widget_textclock
-          , laytou = awful.widget.layout.horizontal.leftright}
+          , widget_net
+          , layout = awful.widget.layout.horizontal.leftright}
       , widget_cputemp
       , widget_cpu
       , widget_volume
-      , widget_net
       , widget_prompt[s]
       , layout = awful.widget.layout.horizontal.rightleft
     }
     wibox_main[s].y = 16
     -- }}}
 end
+
+timer_widget_update:start()
 -- }}}
 
 -- {{{ Mouse bindings
