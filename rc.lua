@@ -262,56 +262,62 @@ widget_tasklist.buttons = awful.util.table.join(
         function () awful.client.focus.byidx(-1) if client.focus then client.focus:raise() end end))
 -- }}}
 
--- {{{ wibox 
 wibox_main = {}
 wibox_status = {}
 widget_prompt = {}
 widget_layout = {}
 
 for s = 1, screen.count() do
-    -- Create a promptbox for each screen
+    -- {{{ prompt
     widget_prompt[s] = awful.widget.prompt({ layout = awful.widget.layout.horizontal.leftright })
+    -- }}}
 
-    -- Create an imagebox widget which will contains an icon indicating which layout we're using.
-    -- We need one layoutbox per screen.
+    -- {{{ layout box
     widget_layout[s] = awful.widget.layoutbox(s)
     widget_layout[s]:buttons(awful.util.table.join(
         awful.button({ }, 1, function () awful.layout.inc(layouts,  1) end)
       , awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end)
       , awful.button({ }, 5, function () awful.layout.inc(layouts,  1) end)
       , awful.button({ }, 4, function () awful.layout.inc(layouts, -1) end)))
+    -- }}}
 
-    -- Create a widget_taglist widget
+    -- {{{ taglist
     widget_taglist[s] = awful.widget.taglist(s, awful.widget.taglist.label.all, widget_taglist.buttons)
-
-    -- Create a tasklist widget
+    -- }}}
+    
+    -- {{{ tasklist
     widget_tasklist[s] = awful.widget.tasklist(
         function(c) return awful.widget.tasklist.label.currenttags(c, s) end,
         widget_tasklist.buttons)
+    -- }}}
 
-    -- Create the wibox
+    -- wiboxes {{{
     wibox_main[s]   = awful.wibox({ position = "top", screen = s, height = 32})
-
-    -- Add widgets to the wibox - order matters
     wibox_main[s].widgets = {
-        {   launcher_main
-          , widget_taglist[s]
-          , widget_prompt[s]
+        {   widget_taglist[s]
           , layout = awful.widget.layout.horizontal.leftright
         }
       , widget_layout[s]
-      , widget_textclock
-      , widget_cputemp
-      , widget_cpu
-      , widget_volume
-      , widget_net
-      , widget_seperator
       , s == 1 and widget_systray or nil
       , widget_tasklist[s]
       , layout = awful.widget.layout.horizontal.rightleft
     }
+
+    wibox_status[s] = awful.wibox({ position = top, screen = s, height = 16 })
+    wibox_status[s].widgets = {
+        {   launcher_main
+          , widget_textclock
+          , laytou = awful.widget.layout.horizontal.leftright}
+      , widget_cputemp
+      , widget_cpu
+      , widget_volume
+      , widget_net
+      , widget_prompt[s]
+      , layout = awful.widget.layout.horizontal.rightleft
+    }
+    wibox_main[s].y = 16
+    -- }}}
 end
--- }}}
 -- }}}
 
 -- {{{ Mouse bindings

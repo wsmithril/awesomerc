@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cmd="compton -cfFG -I-1 -O-1 -D1.7 -r15 -o0.9 -m0.95"
+cmd="compton -cCfFG -I-1 -O-1 -D1.7 -r15 -o0.9 -m0.95"
 
 sc_name=$(basename $0)
 pidfile_dir=/tmp/awesome-autostart
