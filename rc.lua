@@ -142,7 +142,7 @@ naughty.config.presets.low.opacity = 0.8
 -- Define a tag table which will hold all screen tags.
 tags = {
     names  = { "Main",     "Broswer",   "Utils",    "GVim",     "dev",      6, 7, 8, 9 }
-  , layout = { layouts[1], layouts[2], layouts[2], layouts[2], layouts[6]
+  , layout = { layouts[1], layouts[1], layouts[1], layouts[2], layouts[1]
              , layouts[1], layouts[1],  layouts[1], layouts[1] }
 }
 
@@ -225,29 +225,31 @@ function net_status()
     return ret
 end
 
-old_net_status = nil
-
-function update_net_widget(w)
-    local text = "" 
-    local line, rx, tx
-    local rx_max = 360 * 1024
-    local tx_max = 100 * 1024
-    local s = net_status()
-    if old_net_status == nil then old_net_status = s end
-    for k, v in pairs(s) do
-        if v.status == "up" then
-            rx = old_net_status[k] and (v.rx - old_net_status[k].rx) / update_interval or 0
-            tx = old_net_status[k] and (v.tx - old_net_status[k].tx) / update_interval or 0
-            line = k .. ' <span color="' .. gradient("#CCA0A0", "#CC3030", 0, rx_max, rx) .. '">↓' .. format_byte(rx) .. 'B/s</span>' 
-                     .. ' <span color="' .. gradient("#93CC93", "#30CC30", 0, tx_max, tx) .. '">↑' .. format_byte(tx) .. 'B/s</span>'
-        else
-            line = k .. ' <span color="#D0D0D0">---</span>'
+function update_net_widget_helper()
+    local old_status
+    return function (w) 
+        local text = "" 
+        local line, rx, tx
+        local rx_max = 360 * 1024
+        local tx_max = 100 * 1024
+        local s = net_status()
+        if old_status == nil then old_status = s end
+        for k, v in pairs(s) do
+            if v.status == "up" then
+                rx = old_status[k] and (v.rx - old_status[k].rx) / update_interval or 0
+                tx = old_status[k] and (v.tx - old_status[k].tx) / update_interval or 0
+                line = k .. ' <span color="' .. gradient("#A09090", "#EC3030", 0, rx_max, rx) .. '">↓' .. format_byte(rx) .. 'B/s</span>' 
+                         .. ' <span color="' .. gradient("#93A093", "#30EC30", 0, tx_max, tx) .. '">↑' .. format_byte(tx) .. 'B/s</span>'
+            else
+                line = k .. ' <span color="#D0D0D0">---</span>'
+            end
+            text = text .. "|" .. line
         end
-        text = text .. "|" .. line
+        w.text = text .. '|'
+        old_status = s
     end
-    w.text = text
-    old_net_status = s
 end
+update_net_widget = update_net_widget_helper()
 
 widget_net = widget({ type = "textbox" })
 timer_widget_update:add_signal("timeout", function () update_net_widget(widget_net) end)
@@ -301,7 +303,7 @@ function update_volume_widget(w)
     if status == "on" and (vol > 0) then
         w.text = string.format("♪%3d", vol) .. "%"
     else
-        w.text = '<span color="red">---M</span>'
+        w.text = '<span color="red">♪Mute</span>'
     end
 end
 
@@ -312,17 +314,48 @@ update_volume_widget(widget_volume)
 -- {{{ CPU usage and temp
 -- CPU widget
 widget_cpu = widget({ type = "textbox" })
-vicious.register(widget_cpu, vicious.widgets.cpu, function (widget, args) return string.format(" ☢ %3d%%", tonumber(args[1])) end)
-widget_cpu.width = 48
+function cpu_usage()
+    local fd = io.open("/proc/stat")
+    local cpu_lines = { total = 0, idle = 0 }
+    for l in fd:lines() do
+        local idx = 0
+        for num in string.gmatch(l, "[^%s]+") do
+            idx = idx + 1
+            if idx ~= 1 then cpu_lines.total = cpu_lines.total + tonumber(num) end
+            if idx == 5 then cpu_lines.idle  = tonumber(num) end
+        end
+        break
+    end
+    fd:close()
+    return cpu_lines
+end
+
+function cpu_widget_update_helper()
+    local old_state
+    return function (w)
+        local new_state = cpu_usage()
+        local usage = 0.0
+        if old_state ~= nil then 
+            usage = usage + 1 - (new_state.idle - old_state.idle) * 1.0 / (new_state.total - old_state.total)
+        end
+        w.text = string.format(" ☢%3d%%", usage * 100)
+        old_state = new_state
+    end
+end
+cpu_widget_update = cpu_widget_update_helper()
+timer_widget_update:add_signal("timeout", function () cpu_widget_update(widget_cpu) end)
 
 -- CPU temperature widget
 widget_cputemp = widget({ type = "textbox" })
-vicious.register(widget_cputemp, vicious.widgets.thermal, function (widget, args) return args[1] .. "°C" end, 19, "thermal_zone0" )
-widget_cputemp.width = 32
+vicious.register(widget_cputemp, vicious.widgets.thermal, 
+    function (widget, args) 
+        return '<span color="' .. gradient("#50E050", "#E05050", 50, 100, args[1]) .. '">' 
+                               .. args[1] .. "</span>°C" 
+    end, 19, "thermal_zone0" )
 -- }}}
 
 -- {{{ systray
-widget_systray = widget({ type = "systray" })
+widget_systray = widget({ type = "systray", height = 24 })
 -- }}}
 
 -- {{{ taglist buttons
@@ -400,30 +433,28 @@ for s = 1, screen.count() do
     -- }}}
 
     -- wiboxes {{{
-    wibox_main[s]   = awful.wibox({ position = "top", screen = s, height = 32})
+    wibox_main[s]   = awful.wibox({ position = "top", screen = s, height = 48})
     wibox_main[s].widgets = {
-        {   widget_taglist[s]
-          , layout = awful.widget.layout.horizontal.leftright
-        }
-      , widget_layout[s]
-      , s == 1 and widget_systray or nil
-      , widget_tasklist[s]
-      , layout = awful.widget.layout.horizontal.rightleft
-    }
+        {   {   launcher_main
+              , widget_textclock
+              , widget_net 
+              , layout = awful.widget.layout.horizontal.leftright }
+          , widget_cputemp
+          , widget_cpu
+          , widget_volume
+          , widget_prompt[s]
+          , layout = awful.widget.layout.horizontal.rightleft } 
+      , {   {   widget_taglist[s]
+              , widget_seperator
+              , layout = awful.widget.layout.horizontal.leftright }
+          , widget_layout[s]
+          , widget_seperator
+          , s == 1 and widget_systray or nil
+          , widget_seperator
+          , widget_tasklist[s]
+          , layout = awful.widget.layout.horizontal.rightleft }
+        , layout = awful.widget.layout.vertical.flex }
 
-    wibox_status[s] = awful.wibox({ position = top, screen = s, height = 16 })
-    wibox_status[s].widgets = {
-        {   launcher_main
-          , widget_textclock
-          , widget_net
-          , layout = awful.widget.layout.horizontal.leftright}
-      , widget_cputemp
-      , widget_cpu
-      , widget_volume
-      , widget_prompt[s]
-      , layout = awful.widget.layout.horizontal.rightleft
-    }
-    wibox_main[s].y = 16
     -- }}}
 end
 
@@ -615,7 +646,7 @@ awful.rules.rules = {
       callback   = awful.client.setslave }
     -- sakura terminal
   , { rule = { class = "Sakura" }, 
-      properties = { floating = true, ontop = true, opacity = 0.8 }}
+      properties = { floating = true, ontop = true, opacity = 0.8, x = 400, y = 400 }}
     -- Flash Full screen
   , { rule = { class = "Plugin-container"}, properties = {floating = true, fullscreen = true } }
     -- Deadbeef
