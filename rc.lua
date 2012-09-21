@@ -6,8 +6,6 @@ require("awful.rules")
 require("beautiful")
 -- Notification library
 require("naughty")
--- Widget Library
-vicious = require("vicious")
 
 -- Compiz Expose like
 require("revelation")
@@ -347,15 +345,24 @@ timer_widget_update:add_signal("timeout", function () cpu_widget_update(widget_c
 
 -- CPU temperature widget
 widget_cputemp = widget({ type = "textbox" })
-vicious.register(widget_cputemp, vicious.widgets.thermal, 
-    function (widget, args) 
-        return '<span color="' .. gradient("#50E050", "#E05050", 50, 100, args[1]) .. '">' 
-                               .. args[1] .. "</span>°C" 
-    end, 19, "thermal_zone0" )
+
+function cputemp_update()
+    local fd = io.open("/sys/class/thermal/temp")
+    local temp = (fd:read("*a"))
+end
+
+timer_widget_update:add_signal("timeout", 
+    function ()
+        local fd = io.open("/sys/class/thermal/thermal_zone0/temp")
+        local temp = tonumber(fd:read("*a")) / 1000
+        fd:close()
+        widget_cputemp.text = "<span color=\"" .. gradient("#50E050", "E05050", 50, 95, temp) .. "\">"
+                           .. string.format("% 3d", temp) .. "</span>°C"
+    end)
 -- }}}
 
 -- {{{ systray
-widget_systray = widget({ type = "systray", height = 24 })
+widget_systray = widget({ type = "systray", height = 32})
 -- }}}
 
 -- {{{ taglist buttons
