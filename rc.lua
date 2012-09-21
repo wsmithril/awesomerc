@@ -45,7 +45,7 @@ function format_byte(byte)
     if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "k" end
     if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "M" end
     if byte > 1024 * 0.9 then byte = byte / 1024.0 unit = "G" end
-    return string.format("%3.1f%s", byte, unit)
+    return string.format("% 3.1f%s", byte, unit)
 end
 
 function gradient(color, to_color, min, max, value)
@@ -142,8 +142,8 @@ naughty.config.presets.low.opacity = 0.8
 -- Define a tag table which will hold all screen tags.
 tags = {
     names  = { "Main",     "Broswer",   "Utils",    "GVim",     "dev",      6, 7, 8, 9 }
-  , layout = { layouts[1], layouts[1], layouts[1], layouts[2], layouts[1]
-             , layouts[1], layouts[1],  layouts[1], layouts[1] }
+  , layout = { layouts[10], layouts[2], layouts[10], layouts[2], layouts[10]
+             , layouts[10], layouts[10],  layouts[10], layouts[10] }
 }
 
 -- tags for Screen 1, others using default tag layout
@@ -301,9 +301,9 @@ function update_volume_widget(w)
     local status = volume_control("status")
     local vol    = volume_control("volume")
     if status == "on" and (vol > 0) then
-        w.text = string.format("♪%3d", vol) .. "%"
+        w.text = string.format("♫% 3d", vol) .. "%"
     else
-        w.text = '<span color="red">♪Mute</span>'
+        w.text = '<span color="red">♫Mute</span>'
     end
 end
 
@@ -338,7 +338,7 @@ function cpu_widget_update_helper()
         if old_state ~= nil then 
             usage = usage + 1 - (new_state.idle - old_state.idle) * 1.0 / (new_state.total - old_state.total)
         end
-        w.text = string.format(" ☢%3d%%", usage * 100)
+        w.text = string.format(" ☢% 3d%%", usage * 100)
         old_state = new_state
     end
 end
@@ -494,23 +494,21 @@ globalkeys = awful.util.table.join(
 
     -- Standard program
   , awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end)
-  , awful.key({ modkey, "Control" }, "r", awesome.restart)
+  , awful.key({ modkey, "Control", "Mod1" }, "r", awesome.restart)
   , awful.key({ modkey, "Shift"   }, "q", awesome.quit)
 
-  --, awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end
-  --, awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end)
-  --, awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1)      end)
-  --, awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end)
-  --, awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end)
-  --, awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end)
+  , awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end)
+  , awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end)
+  , awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1)      end)
+  , awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end)
+  , awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end)
+  , awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end)
   , awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end)
   , awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end)
 
---  , awful.key({ modkey, "Control" }, "n", awful.client.restore)
-
     -- Prompt
+  , awful.key({ modkey, "Shift" },   "r",     function () widget_prompt[mouse.screen]:run() end)
   , awful.key({ modkey },            "r",     function () widget_prompt[mouse.screen]:run() end)
-
   , awful.key({ modkey },            "x",
               function ()
                   awful.prompt.run(
@@ -523,29 +521,24 @@ globalkeys = awful.util.table.join(
   , awful.key({ modkey }, "b", revelation)
 
     -- start nautilus
-  , awful.key({ modkey }, "n", function () awful.util.spawn("nautilus --no-desktop") end)
+  , awful.key({ modkey }, "e", function () awful.util.spawn("nautilus --no-desktop") end)
     -- media keys
   , awful.key({}, "XF86AudioMute",        function () volume_control("toggle") update_volume_widget(widget_volume) end)
   , awful.key({}, "XF86AudioLowerVolume", function () volume_control("down")   update_volume_widget(widget_volume) end)
   , awful.key({}, "XF86AudioRaiseVolume", function () volume_control("up")     update_volume_widget(widget_volume) end)
-    -- lock screen with WIN+l
-  , awful.key({ modkey }, "l", function () awful.util.spawn("slock") end)
+    -- lock screen
+  , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("slock") end)
 )
 
 clientkeys = awful.util.table.join(
-    awful.key({ modkey,           }, "f",      function (c) c.fullscreen = not c.fullscreen  end)
-  , awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end)
-  , awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     )
+    awful.key({ modkey,           }, "f",      awful.client.floating.toogle)
+  , awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill() end)
+  , awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle)
   , awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end)
-  , awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        )
-  , awful.key({ modkey, "Shift"   }, "r",      function (c) c:redraw()                       end)
-  , awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end)
-  , awful.key({ modkey,           }, "n",
-        function (c)
-            -- The client currently has the input focus, so it cannot be
-            -- minimized, since minimized clients can't have the focus.
-            c.minimized = true
-        end)
+  , awful.key({ modkey,           }, "o",      awful.client.movetoscreen)
+  , awful.key({ modkey, "Shift"   }, "r",      function (c) c:redraw() end)
+  , awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop end)
+  , awful.key({ modkey,           }, "n",      function (c) c.minimized = true end)
   , awful.key({ modkey,           }, "m",
         function (c)
             c.maximized_horizontal = not c.maximized_horizontal
@@ -613,54 +606,39 @@ awful.rules.rules = {
         border_width = 0
       , border_color = beautiful.border_normal
       , focus        = true
+      , floating     = true
       , keys         = clientkeys
       , size_hints_honor = false
       , buttons      = clientbuttons } 
-    , callback = function (c) 
-            naughty.notify({ title = c.name .. " Started", presets = naughty.config.presets.normal, timeout = 2, icon = c.icon })
+    , callback = function (c)
+            if c.name then
+                naughty.notify({ title = c.name .. " Started", presets = naughty.config.presets.normal, timeout = 2, icon = c.icon })
+            end
         end}
 
-    -- Fire and Pidgin on tag[1][2], horizenily side by side 
+    -- Firefox and Pidgin on tag[1][2], horizenily side by side 
   , { rule = { class = "Firefox", role = "browse" },
-      properties = { 
-            floating = true
-          , x = 0
-          , tag = tags[1][2] 
-          , maximized_vertical = true
-          , width = 1280 } }
+      properties = { x = 0 , tag = tags[1][2] , maximized_vertical = true , width = 1280 } }
     -- pidgin
   , { rule       = { class = "Pidgin", role = "buddy_list" },
-      properties = { 
-          floating = true
-        , maximized_vertical = true
-        , tag = tags[1][2]
-        , width = 1920 - 1280
-        , x = 1280 } }
+      properties = { minimized = true, maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 } }
   , { rule       = { class = "Pidgin", role = "conversation" },
-      properties = { 
-          floating = true
-        , maximized_vertical = true
-        , tag = tags[1][2]
-        , width = 1920 - 1280
-        , x = 1280 },
+      properties = { maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 },
       callback   = awful.client.setslave }
     -- sakura terminal
   , { rule = { class = "Sakura" }, 
-      properties = { floating = true, ontop = true, opacity = 0.8, x = 400, y = 400 }}
+      properties = { ontop = true, opacity = 0.8 }}
     -- Flash Full screen
-  , { rule = { class = "Plugin-container"}, properties = {floating = true, fullscreen = true } }
+  , { rule = { class = "Plugin-container"}, properties = {fullscreen = true } }
     -- Deadbeef
   , { rule = {class = "Deadbeef" },
-      properties = { 
-            maximized_vertical = true
-          , float = true
-          , x = 920
-          , width = 1000 }}
+      properties = { maximized_vertical = true , x = 920 , width = 1000 }}
 }
 -- }}}
 
 -- {{{ autostart
 awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh start")
+awful.util.spawn("xsetroot -cursor_name  Adwaita")
 -- }}} 
 
 -- {{{ autostop
