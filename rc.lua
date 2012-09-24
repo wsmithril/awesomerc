@@ -236,22 +236,23 @@ function update_net_widget_helper()
             if v.status == "up" then
                 rx = old_status[k] and (v.rx - old_status[k].rx) / update_interval or 0
                 tx = old_status[k] and (v.tx - old_status[k].tx) / update_interval or 0
-                line = k .. ' <span color="' .. gradient("#A09090", "#EC3030", 0, rx_max, rx) .. '">↓' .. format_byte(rx) .. 'B/s</span>' 
-                         .. ' <span color="' .. gradient("#93A093", "#30EC30", 0, tx_max, tx) .. '">↑' .. format_byte(tx) .. 'B/s</span>'
+                line = "✓" .. k .. '<span color="' .. gradient("#93A093", "#30EC30", 0, tx_max, tx) .. '">' .. format_byte(tx) .. 'B/s</span> '
+                                .. '⇅<span color="' .. gradient("#A09090", "#EC3030", 0, rx_max, rx) .. '">' .. format_byte(rx) .. 'B/s</span>' 
             else
-                line = k .. ' <span color="#D0D0D0">---</span>'
+                line = nil
+                -- line = k .. '<span color="#D0D0D0">-</span>'
             end
-            text = text .. "|" .. line
+            if line then text = text .. (text == "" and "" or "|") .. line end
         end
-        w.text = text .. '|'
         old_status = s
+        w.text = text
     end
 end
 update_net_widget = update_net_widget_helper()
 
 widget_net = widget({ type = "textbox" })
 timer_widget_update:add_signal("timeout", function () update_net_widget(widget_net) end)
--- }}}
+ -- }}}
 
 -- {{{ volume control widget
 function ran_and_wait(cmd)
@@ -407,6 +408,10 @@ widget_tasklist.buttons = awful.util.table.join(
         function () awful.client.focus.byidx(1) if client.focus then client.focus:raise() end end)
   , awful.button({ }, 4, 
         function () awful.client.focus.byidx(-1) if client.focus then client.focus:raise() end end))
+
+-- }}}
+
+-- {{{ SSID widget
 
 -- }}}
 
