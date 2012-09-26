@@ -1,0 +1,3 @@
+#! /bin/bash
+
+[ x"$1" == "xstart" ] && synclient TapAndDragGesture=1 FastTaps=0 HorizTwoFingerScroll=1 PalmDetect=1

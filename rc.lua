@@ -99,7 +99,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
-beautiful.init(awful.util.getdir("config") .. "/themes/nice-and-clean-theme/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "sakura"
@@ -140,8 +140,8 @@ naughty.config.presets.low.opacity = 0.8
 -- Define a tag table which will hold all screen tags.
 tags = {
     names  = { "Main",     "Broswer",   "Utils",    "GVim",     "dev",      6, 7, 8, 9 }
-  , layout = { layouts[10], layouts[2], layouts[10], layouts[2], layouts[10]
-             , layouts[10], layouts[10],  layouts[10], layouts[10] }
+  , layout = { layouts[1], layouts[1], layouts[1], layouts[2], layouts[2]
+             , layouts[2], layouts[1],  layouts[2], layouts[2] }
 }
 
 -- tags for Screen 1, others using default tag layout
@@ -183,8 +183,9 @@ launcher_main = awful.widget.launcher({
 
 -- {{{ Widget
 -- widget update timer
-update_interval = 3
+update_interval = 2
 timer_widget_update = timer({ timeout = update_interval })
+timer_widget_update_long = timer({ timeout = 30 })
 
 -- {{{ text clock
 widget_textclock = awful.widget.textclock()
@@ -223,9 +224,9 @@ function net_status()
     return ret
 end
 
-function update_net_widget_helper()
+function update_net_widget_helper(w)
     local old_status
-    return function (w) 
+    return function () 
         local text = "" 
         local line, rx, tx
         local rx_max = 360 * 1024
@@ -245,13 +246,15 @@ function update_net_widget_helper()
             if line then text = text .. (text == "" and "" or "|") .. line end
         end
         old_status = s
-        w.text = text
+        w.widget.text = " " .. text .. " "
+        w.status = s
     end
 end
-update_net_widget = update_net_widget_helper()
 
-widget_net = widget({ type = "textbox" })
-timer_widget_update:add_signal("timeout", function () update_net_widget(widget_net) end)
+widget_net = {}
+widget_net.widget = widget({ type = "textbox" })
+update_net_widget = update_net_widget_helper(widget_net)
+timer_widget_update:add_signal("timeout", update_net_widget)
  -- }}}
 
 -- {{{ volume control widget
@@ -289,24 +292,24 @@ function volume_control(action)
     end
 end
 
-widget_volume = widget({ type = "textbox", name = "widget_volume" })
-widget_volume:buttons(awful.util.table.join(
+widget_volume = {}
+widget_volume.widget = widget({ type = "textbox", name = "widget_volume" })
+widget_volume.widget:buttons(awful.util.table.join(
     awful.button({ }, 4, function () volume_control("up")     update_volume_widget(widget_volume) end)
   , awful.button({ }, 1, function () volume_control("toggle") update_volume_widget(widget_volume) end)
   , awful.button({ }, 5, function () volume_control("down")   update_volume_widget(widget_volume) end)
 ))
 
 function update_volume_widget(w)
-    local status = volume_control("status")
-    local vol    = volume_control("volume")
-    if status == "on" and (vol > 0) then
-        w.text = string.format("♫% 3d", vol) .. "%"
+    w.status = volume_control("status")
+    w.vol    = volume_control("volume")
+    if w.status == "on" and (w.vol > 0) then
+        w.widget.text = string.format("♫% 3d", w.vol) .. "%"
     else
-        w.text = '<span color="red">♫Mute</span>'
+        w.widget.text = '<span color="red">♫Mute</span>'
     end
 end
 
-timer_widget_update:add_signal("timeout", function () update_volume_widget(widget_volume) end)
 update_volume_widget(widget_volume)
 --- }}}
 
@@ -357,7 +360,7 @@ timer_widget_update:add_signal("timeout",
         local fd = io.open("/sys/class/thermal/thermal_zone0/temp")
         local temp = tonumber(fd:read("*a")) / 1000
         fd:close()
-        widget_cputemp.text = "<span color=\"" .. gradient("#50E050", "E05050", 50, 95, temp) .. "\">"
+        widget_cputemp.text = "<span color=\"" .. gradient("#20E020", "#E02020", 50, 95, temp) .. "\">"
                            .. string.format("% 3d", temp) .. "</span>°C"
     end)
 -- }}}
@@ -449,11 +452,11 @@ for s = 1, screen.count() do
     wibox_main[s].widgets = {
         {   {   launcher_main
               , widget_textclock
-              , widget_net 
+              , widget_net.widget
               , layout = awful.widget.layout.horizontal.leftright }
           , widget_cputemp
           , widget_cpu
-          , widget_volume
+          , widget_volume.widget
           , widget_prompt[s]
           , layout = awful.widget.layout.horizontal.rightleft } 
       , {   {   widget_taglist[s]
@@ -543,7 +546,7 @@ globalkeys = awful.util.table.join(
 )
 
 clientkeys = awful.util.table.join(
-    awful.key({ modkey,           }, "f",      awful.client.floating.toogle)
+    awful.key({ modkey,           }, "f",      awful.client.floating.toggle)
   , awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill() end)
   , awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle)
   , awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end)
@@ -618,7 +621,7 @@ awful.rules.rules = {
         border_width = 0
       , border_color = beautiful.border_normal
       , focus        = true
-      , floating     = true
+      , floating     = false
       , keys         = clientkeys
       , size_hints_honor = false
       , buttons      = clientbuttons } 
@@ -627,7 +630,8 @@ awful.rules.rules = {
                 naughty.notify({ title = c.name .. " Started", presets = naughty.config.presets.normal, timeout = 2, icon = c.icon })
             end
         end}
-
+    -- Floating dialog window
+  , { rule = { type = "dialog" }, properties = { ontop = true, floating = true }}
     -- Firefox and Pidgin on tag[1][2], horizenily side by side 
   , { rule = { class = "Firefox", role = "browse" },
       properties = { x = 0 , tag = tags[1][2] , maximized_vertical = true , width = 1280 } }
@@ -638,13 +642,13 @@ awful.rules.rules = {
       properties = { maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 },
       callback   = awful.client.setslave }
     -- sakura terminal
-  , { rule = { class = "Sakura" }, 
-      properties = { ontop = true, opacity = 0.8 }}
+  , { rule = { class = "Sakura" }, properties = { opacity = 0.8 }}
     -- Flash Full screen
   , { rule = { class = "Plugin-container"}, properties = {fullscreen = true } }
     -- Deadbeef
   , { rule = {class = "Deadbeef" },
       properties = { maximized_vertical = true , x = 920 , width = 1000 }}
+  , { rule = { class = "Guake" }, properties = { floating = true} }
 }
 -- }}}
 
