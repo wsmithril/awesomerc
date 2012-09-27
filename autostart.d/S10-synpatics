@@ -1,3 +1,10 @@
 #! /bin/bash
 
-[ x"$1" == "xstart" ] && synclient TapAndDragGesture=1 FastTaps=0 HorizTwoFingerScroll=1 PalmDetect=1
+[ x"$1" == "xstart" ] && synclient \
+    apAndDragGesture=1 \
+    FastTaps=0 \
+    HorizTwoFingerScroll=1 \
+    PalmDetect=1 \
+    TapButton1=1 \
+    ClickFinger2=1
+

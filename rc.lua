@@ -642,7 +642,7 @@ awful.rules.rules = {
       properties = { maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 },
       callback   = awful.client.setslave }
     -- sakura terminal
-  , { rule = { class = "Sakura" }, properties = { opacity = 0.8 }}
+  , { rule = { class = "Sakura" }, properties = { opacity = 0.8, floating = true }}
     -- Flash Full screen
   , { rule = { class = "Plugin-container"}, properties = {fullscreen = true } }
     -- Deadbeef
