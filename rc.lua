@@ -202,7 +202,7 @@ function net_status()
     local base_dir = "/sys/class/net"
     local ret = {}
     for dev in lfs.dir(base_dir) do
-        if any(function (p) return string.match(dev, p) end, "wlan%d+", "p2p%d+", "eth%d+", "em%d+") then
+        if any(function (p) return string.match(dev, p) end, "wlan%d+", "p2p%d+", "eth%d+", "em%d+", "lo") then
             local fd, status, rx, tx
             fd = io.open(base_dir .. '/' .. dev .. '/operstate')
             status = fd:read("*l")
@@ -559,7 +559,10 @@ clientkeys = awful.util.table.join(
             c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
         end)
-  , awful.key({ modkey }, "Up", function (c) c.maximized_vertical = not c.maximized_vertical end)
+  , awful.key({ modkey }, "Up", function (c) 
+      c.maximized_vertical = not c.maximized_vertical  
+      awful.titlebar.remove(c)
+    end)
 
 )
 
@@ -650,6 +653,41 @@ awful.rules.rules = {
       properties = { maximized_vertical = true , x = 920 , width = 1000 }}
   , { rule = { class = "Guake" }, properties = { floating = true} }
 }
+-- }}}
+
+-- {{{ signal handlers
+client.add_signal("manage", function (c, startup)
+    -- Add titlebar to floaters, but remove those from rule callback
+    c:add_signal("mouse::enter", function (c)
+        if (awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating)
+           and not c.maximized_vertical then
+            awful.titlebar.add(c, { modkey = modkey, height = 16, sys_widgets = false, 
+                                    bg = "#4E7AA7", bg_focus = "#4E7AA7",
+                                    fg = "#ffffff", fg_focus = "#ffffff"});
+        end
+    end)
+    
+    local remove_titlebar = function ()
+        if awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating then
+            awful.titlebar.remove(c)
+        end
+    end
+
+    c:add_signal("mouse::leave", remove_titlebar)
+    c:add_signal("property::width", remove_titlebar)
+    c:add_signal("property::height", remove_titlebar)
+    c:add_signal("property::x", remove_titlebar)
+    c:add_signal("property::y", remove_titlebar)
+
+    if not startup then
+        awful.client.setslave(c)
+
+        if not c.size_hints.program_position and not c.size_hints.user_position then
+            awful.placement.no_overlap(c)
+            awful.placement.no_offscreen(c)
+        end
+    end
+end)
 -- }}}
 
 -- {{{ autostart
