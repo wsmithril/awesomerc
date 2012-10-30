@@ -1,6 +1,6 @@
 #! /bin/bash
 
-config_dir=~/.config/awesome
+config_dir=$HOME/.config/awesome
 lockfile_dir=/tmp/awesome-autostart
 
 # prepare pidfile dir
