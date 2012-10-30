@@ -1,7 +1,8 @@
 #! /bin/bash
 
-cmd="compton -cCfFG -I-1 -O-1 -D1.7 -r11 -o0.85 -t-15 -l-15 -m0.95"
-
+#cmd="compton -cCfG -I-1 -O-1 -D1.7 -r11 -o0.85 -t-15 -l-15 -m0.95"
+cmd="compton --config $HOME/.config/awesome/compton.conf"
+echo $cmd
 sc_name=$(basename $0)
 pidfile_dir=/tmp/awesome-autostart
 
