@@ -257,7 +257,7 @@ update_net_widget = update_net_widget_helper(widget_net)
 timer_widget_update:add_signal("timeout", update_net_widget)
  -- }}}
 
--- {{{ volume control widget
+-- { {{ volume control widget
 function ran_and_wait(cmd)
     local fd = io.popen(cmd)
     fd:read("*all")
@@ -311,7 +311,7 @@ function update_volume_widget(w)
 end
 
 update_volume_widget(widget_volume)
---- }}}
+--- }}} 
 
 -- {{{ CPU usage and temp
 -- CPU widget
@@ -418,6 +418,29 @@ widget_tasklist.buttons = awful.util.table.join(
 
 -- }}}
 
+-- {{{ weather Widgit
+local weather_widget = {}
+weather_widget.city_id = "2442047"
+weather_widget.widget  = widget({ type = "textbox", text = "" })
+weather_widget.tooltip = awful.tooltip({ objects = { weather_widget.widget }})
+weather_widget.updater = function (weather)
+    local fd = io.popen("python " .. awful.util.getdir("config") .. "/weather.py " .. weather.city_id)
+    resp = fd:read("*all")
+    fd:close()
+
+    if resp ~= "None" then
+        weather.widget.text  = "Weather: " .. (resp:match("Temperature: (%d+)%D*") or "N/A" ) .. "°C"
+        weather.tooltip:set_text(resp)
+    else 
+        weather.widget.text  = ""
+        weather.tooltip.text = "Fail to get weather information"
+    end
+end
+weather_widget.timer = timer({ timeout = 1800 })
+weather_widget.timer:add_signal("timeout", function () weather_widget.updater(weather_widget) end)
+weather_widget.timer:emit_signal("timeout")
+-- }}}
+
 wibox_main = {}
 wibox_status = {}
 widget_prompt = {}
@@ -453,6 +476,7 @@ for s = 1, screen.count() do
         {   {   launcher_main
               , widget_textclock
               , widget_net.widget
+              , weather_widget.widget
               , layout = awful.widget.layout.horizontal.leftright }
           , widget_cputemp
           , widget_cpu

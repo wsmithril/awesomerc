@@ -32,6 +32,12 @@ theme.border_marked = "#91231c"
 -- Example:
 --theme.taglist_bg_focus = "#ff0000"
 
+-- tooltip
+theme.tooltip_fg_color = theme.fg_normal
+theme.tooltip_bg_color = theme.bg_normal
+theme.tooltip_border_width = 0
+theme.tooltip_border_color = theme.bg_color
+
 -- Display the taglist squares
 theme.taglist_squares_sel   = theme.theme_dir .. "/taglist/squarefw.png"
 theme.taglist_squares_unsel = theme.theme_dir .. "/taglist/squarew.png"
