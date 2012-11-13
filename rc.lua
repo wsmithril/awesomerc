@@ -11,8 +11,8 @@ require("naughty")
 require("revelation")
 
 -- freedesktop.org menu
-require("freedesktop.utils")
-require("freedesktop.menu")
+-- require("freedesktop.utils")
+-- require("freedesktop.menu")
 lfs = require("lfs")
 
 os.setlocale("zh_CN.utf-8")
@@ -156,10 +156,10 @@ end
 
 -- {{{ Menu
 -- Create a laucher widget and a main menu
-freedesktop.utils.icon_theme = { 'elementary', 'gnome', 'default' }
-freedesktop.utils.terminal = 'sakura'
+-- freedesktop.utils.icon_theme = { 'elementary', 'gnome', 'default' }
+-- freedesktop.utils.terminal = 'sakura'
 
-freedesktop_menu = freedesktop.menu.new()
+-- freedesktop_menu = freedesktop.menu.new()
 
 menu_awesome = {
     { "Edit Config", editor_cmd .. " " .. awesome.conffile }
@@ -170,7 +170,7 @@ menu_awesome = {
 menu_mainmenu = awful.menu( {
     items = {
         { "Awesome", menu_awesome, beautiful.awesome_icon }
-      , { "Applications", freedesktop_menu }
+--      , { "Applications", freedesktop_menu }
       , { "Open Terminal", terminal }
     }
 })
@@ -634,7 +634,14 @@ awful.rules.rules = {
             end
         end}
     -- Floating dialog window
-  , { rule = { type = "dialog" }, properties = { ontop = true, floating = true }}
+  , { rule = { type = "dialog" }, properties = {floating = true },
+      callback = function (c) 
+          if c.urgent then 
+              awful.placement.centered(c)
+              c.ontop  = c.urgent
+              c.sticky = c.urgent
+          end
+      end} 
     -- Firefox and Pidgin on tag[1][2], horizenily side by side 
   , { rule = { class = "Firefox", role = "browse" },
       properties = { x = 0 , tag = tags[1][2] , maximized_vertical = true , width = 1280 } }
@@ -645,12 +652,12 @@ awful.rules.rules = {
       properties = { maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 },
       callback   = awful.client.setslave }
     -- sakura terminal
-  , { rule = { class = "Sakura" }, properties = { opacity = 0.8, floating = true }}
+  , { rule = { class = "Sakura" }, properties = { opacity = 0.9, floating = true }}
     -- Flash Full screen
   , { rule = { class = "Plugin-container"}, properties = {fullscreen = true } }
     -- Deadbeef
-  , { rule = {class = "Deadbeef" },
-      properties = { maximized_vertical = true , x = 920 , width = 1000 }}
+  , { rule = {class = "Deadbeef" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
+  , { rule = {class = "Transmission-gtk" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
   , { rule = { class = "Guake" }, properties = { floating = true} }
 }
 -- }}}
