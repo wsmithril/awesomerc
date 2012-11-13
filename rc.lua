@@ -420,7 +420,7 @@ widget_tasklist.buttons = awful.util.table.join(
 
 -- {{{ weather Widgit
 local weather_widget = {}
-weather_widget.city_id = "2442047"
+weather_widget.city_id = "2151330"
 weather_widget.widget  = widget({ type = "textbox", text = "" })
 weather_widget.tooltip = awful.tooltip({ objects = { weather_widget.widget }})
 weather_widget.updater = function (weather)

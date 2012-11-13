@@ -1,4 +1,5 @@
 #! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 import urllib, sys
 from xml.dom.minidom import parse
@@ -37,7 +38,7 @@ class yahoo_weather(weather_provider):
 
         return "\n".join([
             " " + resp["location"] + " " + resp["condition"],
-            "Temperature: " + resp["temp"] + "°C",
+            "Temperature: " + resp["temp"] + " C",
             "Wind: " + resp["wind speed"] + " km/h " + "Direction: " + resp["wind dire"] ])
 
 
