@@ -237,8 +237,8 @@ function update_net_widget_helper(w)
             if v.status == "up" then
                 rx = old_status[k] and (v.rx - old_status[k].rx) / update_interval or 0
                 tx = old_status[k] and (v.tx - old_status[k].tx) / update_interval or 0
-                line = "✓" .. k .. '<span color="' .. gradient("#93A093", "#30EC30", 0, tx_max, tx) .. '">' .. format_byte(tx) .. 'B/s</span> '
-                                .. '⇅<span color="' .. gradient("#A09090", "#EC3030", 0, rx_max, rx) .. '">' .. format_byte(rx) .. 'B/s</span>' 
+                line = "✓" .. k .. '<span color="' .. gradient("#e0e0e0", "#30EC30", 0, tx_max, tx) .. '">' .. format_byte(tx) .. 'B/s</span> '
+                                .. '⇅<span color="' .. gradient("#e0e0e0", "#EC3030", 0, rx_max, rx) .. '">' .. format_byte(rx) .. 'B/s</span>' 
             else
                 line = nil
                 -- line = k .. '<span color="#D0D0D0">-</span>'
@@ -257,7 +257,7 @@ update_net_widget = update_net_widget_helper(widget_net)
 timer_widget_update:add_signal("timeout", update_net_widget)
  -- }}}
 
--- { {{ volume control widget
+-- {{{ volume control widget
 function ran_and_wait(cmd)
     local fd = io.popen(cmd)
     fd:read("*all")
@@ -429,7 +429,7 @@ weather_widget.updater = function (weather)
     fd:close()
 
     if resp ~= "None" then
-        weather.widget.text  = "Weather: " .. (resp:match("Temperature: (%d+)%D*") or "N/A" ) .. "°C"
+        weather.widget.text  = "Weather: " .. (resp:match("Temperature: (-?%d+)%D*") or "N/A" ) .. "°C"
         weather.tooltip:set_text(resp)
     else 
         weather.widget.text  = ""
@@ -693,8 +693,8 @@ client.add_signal("manage", function (c, startup)
         if (awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating)
            and not c.maximized_vertical then
             awful.titlebar.add(c, { modkey = modkey, height = 16, sys_widgets = false, 
-                                    bg = "#4E7AA7", bg_focus = "#4E7AA7",
-                                    fg = "#ffffff", fg_focus = "#ffffff"});
+                                    bg = beautiful.titlebar_bg, bg_focus = beautiful.titlebar_bg,
+                                    fg = beautiful.tatlebar_fg, fg_focus = beautiful.titlebar_fg});
         end
     end)
     

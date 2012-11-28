@@ -12,15 +12,18 @@ theme.bg_focus      = "#d8d8d8"
 theme.bg_urgent     = "#d02e54"
 theme.bg_minimize   = "#444444"
 
-theme.fg_normal     = "#cccccc"
+theme.fg_normal     = "#f0dfaf"
 theme.fg_focus      = "#000000"
 theme.fg_urgent     = "#ffffff"
-theme.fg_minimize   = "#ffffff"
+theme.fg_minimize   = "#d0bf8f"
 
 theme.border_width  = "1"
 theme.border_normal = "#000000"
 theme.border_focus  = "#535d6c"
 theme.border_marked = "#91231c"
+
+theme.titlebar_bg = "#4e7aa7"
+theme.titlebar_fg = "#ffffff"
 
 -- There are other variable sets
 -- overriding the default one when
