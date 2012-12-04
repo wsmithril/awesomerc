@@ -17,7 +17,7 @@ lfs = require("lfs")
 
 os.setlocale("zh_CN.utf-8")
 
--- {{{ usful functions 
+-- {{{ usful functions
 function id(x)
     return x
 end
@@ -25,7 +25,7 @@ end
 function all(f, x, ...)
     if ... == nil then
         return f(x)
-    else 
+    else
         return f(x) and all(f, ...)
     end
 end
@@ -33,7 +33,7 @@ end
 function any(f, x, ...)
     if ... == nil then
         return f(x)
-    else 
+    else
         return f(x) or any(f, ...)
     end
 end
@@ -52,14 +52,14 @@ function gradient(color, to_color, min, max, value)
     end
 
     local factor = 0
-    if (value >= max ) then 
-        factor = 1  
-    elseif (value > min ) then 
+    if (value >= max ) then
+        factor = 1
+    elseif (value > min ) then
         factor = (value - min) / (max - min)
-    end 
+    end
 
-    local red, green, blue = color2dec(color) 
-    local to_red, to_green, to_blue = color2dec(to_color) 
+    local red, green, blue = color2dec(color)
+    local to_red, to_green, to_blue = color2dec(to_color)
 
     red   = red   + (factor * (to_red   - red))
     green = green + (factor * (to_green - green))
@@ -134,7 +134,7 @@ layouts = {
 -- set opaticy of notifications
 naughty.config.presets.normal.opacity = 0.8
 naughty.config.presets.low.opacity = 0.8
--- }}} 
+-- }}}
 
 -- {{{ Tags
 -- Define a tag table which will hold all screen tags.
@@ -226,8 +226,8 @@ end
 
 function update_net_widget_helper(w)
     local old_status
-    return function () 
-        local text = "" 
+    return function ()
+        local text = ""
         local line, rx, tx
         local rx_max = 360 * 1024
         local tx_max = 100 * 1024
@@ -238,7 +238,7 @@ function update_net_widget_helper(w)
                 rx = old_status[k] and (v.rx - old_status[k].rx) / update_interval or 0
                 tx = old_status[k] and (v.tx - old_status[k].tx) / update_interval or 0
                 line = "✓" .. k .. '<span color="' .. gradient("#e0e0e0", "#30EC30", 0, tx_max, tx) .. '">' .. format_byte(tx) .. 'B/s</span> '
-                                .. '⇅<span color="' .. gradient("#e0e0e0", "#EC3030", 0, rx_max, rx) .. '">' .. format_byte(rx) .. 'B/s</span>' 
+                                .. '⇅<span color="' .. gradient("#e0e0e0", "#EC3030", 0, rx_max, rx) .. '">' .. format_byte(rx) .. 'B/s</span>'
             else
                 line = nil
                 -- line = k .. '<span color="#D0D0D0">-</span>'
@@ -287,7 +287,7 @@ function volume_control(action)
     elseif action == "down" then
         ran_and_wait("amixer -q sset " .. volume_sID .. " 10%- unmute")
     elseif action == "toggle" then
-        ran_and_wait("amixer -q sset " .. volume_sID .. " " 
+        ran_and_wait("amixer -q sset " .. volume_sID .. " "
             .. (volume_control("status") == "on" and "mute" or "unmute"))
     end
 end
@@ -304,14 +304,14 @@ function update_volume_widget(w)
     w.status = volume_control("status")
     w.vol    = volume_control("volume")
     if w.status == "on" and (w.vol > 0) then
-        w.widget.text = string.format("♫% 3d", w.vol) .. "%"
+        w.widget.text = string.format("♫% 4d", w.vol) .. "%"
     else
         w.widget.text = '<span color="red">♫Mute</span>'
     end
 end
 
 update_volume_widget(widget_volume)
---- }}} 
+--- }}}
 
 -- {{{ CPU usage and temp
 -- CPU widget
@@ -337,7 +337,7 @@ function cpu_widget_update_helper()
     return function (w)
         local new_state = cpu_usage()
         local usage = 0.0
-        if old_state ~= nil then 
+        if old_state ~= nil then
             usage = usage + 1 - (new_state.idle - old_state.idle) * 1.0 / (new_state.total - old_state.total)
         end
         w.text = string.format(" ☢% 3d%%", usage * 100)
@@ -349,13 +349,7 @@ timer_widget_update:add_signal("timeout", function () cpu_widget_update(widget_c
 
 -- CPU temperature widget
 widget_cputemp = widget({ type = "textbox" })
-
-function cputemp_update()
-    local fd = io.open("/sys/class/thermal/temp")
-    local temp = (fd:read("*a"))
-end
-
-timer_widget_update:add_signal("timeout", 
+timer_widget_update:add_signal("timeout",
     function ()
         local fd = io.open("/sys/class/thermal/thermal_zone0/temp")
         local temp = tonumber(fd:read("*a")) / 1000
@@ -409,7 +403,7 @@ widget_tasklist.buttons = awful.util.table.join(
         end)
   , awful.button({ }, 5,
         function () awful.client.focus.byidx(1) if client.focus then client.focus:raise() end end)
-  , awful.button({ }, 4, 
+  , awful.button({ }, 4,
         function () awful.client.focus.byidx(-1) if client.focus then client.focus:raise() end end))
 
 -- }}}
@@ -431,13 +425,14 @@ weather_widget.updater = function (weather)
     if resp ~= "None" then
         weather.widget.text  = "Weather: " .. (resp:match("Temperature: (-?%d+)%D*") or "N/A" ) .. "°C"
         weather.tooltip:set_text(resp)
-    else 
+    else
         weather.widget.text  = ""
         weather.tooltip.text = "Fail to get weather information"
     end
 end
 weather_widget.timer = timer({ timeout = 1800 })
 weather_widget.timer:add_signal("timeout", function () weather_widget.updater(weather_widget) end)
+weather_widget.timer:start()
 weather_widget.timer:emit_signal("timeout")
 -- }}}
 
@@ -463,7 +458,7 @@ for s = 1, screen.count() do
     -- {{{ taglist
     widget_taglist[s] = awful.widget.taglist(s, awful.widget.taglist.label.all, widget_taglist.buttons)
     -- }}}
-    
+
     -- {{{ tasklist
     widget_tasklist[s] = awful.widget.tasklist(
         function(c) return awful.widget.tasklist.label.currenttags(c, s) end,
@@ -482,7 +477,7 @@ for s = 1, screen.count() do
           , widget_cpu
           , widget_volume.widget
           , widget_prompt[s]
-          , layout = awful.widget.layout.horizontal.rightleft } 
+          , layout = awful.widget.layout.horizontal.rightleft }
       , {   {   widget_taglist[s]
               , widget_seperator
               , layout = awful.widget.layout.horizontal.leftright }
@@ -583,8 +578,8 @@ clientkeys = awful.util.table.join(
             c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
         end)
-  , awful.key({ modkey }, "Up", function (c) 
-      c.maximized_vertical = not c.maximized_vertical  
+  , awful.key({ modkey }, "Up", function (c)
+      c.maximized_vertical = not c.maximized_vertical
       awful.titlebar.remove(c)
     end)
 
@@ -644,14 +639,14 @@ root.keys(globalkeys)
 -- {{{ Rules
 awful.rules.rules = {
     -- All clients will match this rule.
-    { rule = { }, properties = { 
+    { rule = { }, properties = {
         border_width = 0
       , border_color = beautiful.border_normal
       , focus        = true
       , floating     = false
       , keys         = clientkeys
       , size_hints_honor = false
-      , buttons      = clientbuttons } 
+      , buttons      = clientbuttons }
     , callback = function (c)
             if c.name then
                 naughty.notify({ title = c.name .. " Started", presets = naughty.config.presets.normal, timeout = 2, icon = c.icon })
@@ -659,14 +654,14 @@ awful.rules.rules = {
         end}
     -- Floating dialog window
   , { rule = { type = "dialog" }, properties = {floating = true },
-      callback = function (c) 
-          if c.urgent then 
+      callback = function (c)
+          if c.urgent then
               awful.placement.centered(c)
               c.ontop  = c.urgent
               c.sticky = c.urgent
           end
-      end} 
-    -- Firefox and Pidgin on tag[1][2], horizenily side by side 
+      end}
+    -- Firefox and Pidgin on tag[1][2], horizenily side by side
   , { rule = { class = "Firefox", role = "browse" },
       properties = { x = 0 , tag = tags[1][2] , maximized_vertical = true , width = 1280 } }
     -- pidgin
@@ -692,12 +687,12 @@ client.add_signal("manage", function (c, startup)
     c:add_signal("mouse::enter", function (c)
         if (awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating)
            and not c.maximized_vertical then
-            awful.titlebar.add(c, { modkey = modkey, height = 16, sys_widgets = false, 
+            awful.titlebar.add(c, { modkey = modkey, height = 16, sys_widgets = false,
                                     bg = beautiful.titlebar_bg, bg_focus = beautiful.titlebar_bg,
                                     fg = beautiful.tatlebar_fg, fg_focus = beautiful.titlebar_fg});
         end
     end)
-    
+
     local remove_titlebar = function ()
         if awful.client.floating.get(c) or awful.layout.get(c.screen) == awful.layout.suit.floating then
             awful.titlebar.remove(c)
@@ -724,10 +719,10 @@ end)
 -- {{{ autostart
 awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh start")
 awful.util.spawn("xsetroot -cursor_name  Adwaita")
--- }}} 
+-- }}}
 
 -- {{{ autostop
 awesome.add_signal("exit", function() awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh stop") end)
--- }}} 
+-- }}}
 
 -- vim: set foldmethod=marker:
