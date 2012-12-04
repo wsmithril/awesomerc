@@ -14,6 +14,18 @@ class weather_provider(object):
     def get_weather(self):
         raise Exception
 
+def degree_NEWS(d):
+    # wind direction to NSWE notion
+    d1  = "NEWS"[(d + 46) / 90 % 4]
+    d2  = "NEWS"[(d + 23) / 90 % 4]
+    d3  = "NEWS"[(d + 12) / 90 % 4]
+    if (d1 == d2 and d2 == d3):
+        return d1
+    elif (d2 == d3):
+        return d1 + d2
+    else:
+        return d1 + d2 + d3
+
 class yahoo_weather(weather_provider):
     url = "http://weather.yahooapis.com/forecastrss?u=c&w="
     ns  = "http://xml.weather.yahoo.com/ns/rss/1.0"
@@ -24,7 +36,7 @@ class yahoo_weather(weather_provider):
     def get_weather(self):
         try:
             dom = parse(urllib.urlopen(self._get_url()))
-        except:
+        except Exception as e:
             return "None"
 
         resp = {}
@@ -36,10 +48,12 @@ class yahoo_weather(weather_provider):
         resp["wind speed"] = dom.getElementsByTagNameNS(self.ns, 'wind')[0].getAttribute('speed')
         resp["wind dire"]  = dom.getElementsByTagNameNS(self.ns, 'wind')[0].getAttribute('direction')
 
+        resp["wind dire"] = degree_NEWS(int(resp["wind dire"]))
+
         return "\n".join([
             " " + resp["location"] + " " + resp["condition"],
             "Temperature: " + resp["temp"] + " C",
-            "Wind: " + resp["wind speed"] + " km/h " + "Direction: " + resp["wind dire"] ])
+            "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ])
 
 
 if __name__ == "__main__":
