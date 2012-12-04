@@ -23,10 +23,10 @@ weather.new = function(args)
     ret.updater = function(self)
         local str = run_and_wait("python " .. awful.util.getdir("config") .. "/weather.py " .. self.city)
         if resp ~= "None" then
-            self.widget:set_text("Outdoor:" .. (str:match("Temperature: (-?%d+)%D*")) ..  "°C")
+            self.widget:set_text("Outdoor:" .. (str:match("Temperature: (-?%d+)%D*") or "N/A") ..  "°C")
             self.tooltip:set_text(str)
         else
-            self.widget:set_text("Weather: N/A")
+            self.widget:set_text("Outdoor:N/A")
             self.tooltip:set_text("Fail to get weather")
         end
     end
