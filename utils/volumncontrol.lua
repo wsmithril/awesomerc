@@ -45,7 +45,7 @@ for i, a in ipairs(actions) do
             if (status == "off" or status == 0) then
                 text = '<span color="red">Mute</span>'
             else
-                text = string.format("% 3d%%", status)
+                text = string.format("% 3d%%", status or 0)
             end
             widget:set_markup( "♫" .. text)
         end

@@ -6,7 +6,6 @@ local awful = require("awful")
 theme = {}
 theme.theme_dir = awful.util.getdir("config") .. "/themes"
 theme.wallpaper = theme.theme_dir .. "/background.png"
-theme.wallpaper_cmd = { "awsetbg " .. theme.wallpaper }
 
 theme.font          = "Yahei Mono 10"
 
@@ -104,7 +103,7 @@ theme.layout_tiletop = theme.theme_dir .. "/layouts/tiletopw.png"
 theme.layout_spiral  = theme.theme_dir .. "/layouts/spiralw.png"
 theme.layout_dwindle = theme.theme_dir .. "/layouts/dwindlew.png"
 
-theme.awesome_icon = theme.theme_dir .. "/awesome16.png"
+theme.awesome_icon = theme.theme_dir .. "/awesome64.png"
 
 theme.net_widget_icon = theme.theme_dir .. "/icons/net.png"
 

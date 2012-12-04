@@ -1,9 +1,9 @@
 -- rc file for awesome 3.5
 
 -- Awesome Library
-local awful = require("awful")
-awful.rules = require("awful.rules")
-require("awful.autofocus")
+local awful     = require("awful")
+awful.rules     = require("awful.rules")
+awful.autofocus = require("awful.autofocus")
 local beautiful = require("beautiful")  -- Theme
 local wibox     = require("wibox")      -- Widget and layouts
 local menubar   = require("menubar")    -- menubar
@@ -106,7 +106,7 @@ local menu_main = awful.menu({
           { "Quit",    awesome.quit }},
         beautiful.awesome_icon },
       { "Terminal", tools.terminal }}
-  , theme = { width = 100, height = 16 }})
+  , theme = { width = beautiful.menu_width, height = beautiful.menu_height }})
 
 awful.menu.menu_keys = {
     up    = { "k", "Up" }
@@ -133,6 +133,10 @@ local widget_cputemp  = mywidgets.new({ type = "cputemp",  update = 3, name = "t
 local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol", device = "Master" })
 
+-- icons
+local widget_cpu_icon = wibox.widget.imagebox()
+widget_cpu_icon:set_image(awful.util.getdir("config") .. "/themes/cpu.png")
+widget_cpu_icon:set_resize(false)
 -- }}}
 
  -- {{{ wibox
@@ -161,7 +165,7 @@ widget_tasklist.buttons = awful.util.table.join(
             instance:hide()
             instance = nil
         else
-            instance = awful.menu.clients({width = 250})
+            instance = awful.menu.clients({theme = {width = 250}})
         end
     end)
   , awful.button({ }, 4, function ()
@@ -210,7 +214,7 @@ for s = 1, screen.count() do
 
     local top_left   = wibox.layout.fixed.horizontal()
     local top_right  = wibox.layout.fixed.horizontal()
-    local top_middle = wibox.layout.fixed.horizontal()
+    local top_middle = wibox.layout.flex.horizontal()
     top_left:add(widget_mainlauncher)
     top_left:add(mywidgets.seperator.left)
     top_left:add(widget_textclock)
@@ -226,6 +230,7 @@ for s = 1, screen.count() do
     top_right:add(widget_volumn)
     top_right:add(mywidgets.seperator.right)
     top_right:add(mywidgets.seperator.left)
+    top_right:add(widget_cpu_icon)
     top_right:add(widget_cpuuse)
     top_right:add(widget_cputemp)
     top_right:add(mywidgets.seperator.right)
@@ -236,7 +241,7 @@ for s = 1, screen.count() do
     top:set_right(top_right)
 
     local bottom_left   = wibox.layout.fixed.horizontal()
-    local bottom_middle = wibox.layout.fixed.horizontal()
+    local bottom_middle = wibox.layout.flex.horizontal()
     local bottom_right  = wibox.layout.fixed.horizontal()
     bottom_left:add(widget_taglist[s])
     bottom_left:add(mywidgets.seperator.left)
@@ -259,9 +264,9 @@ for s = 1, screen.count() do
     layout:add(bottom)
 
     wibox_main[s]:set_widget(layout)
-    -- }}}
+    --  }}}
 end
--- }}}
+-- }}} 
 
 -- {{{ Mouse bindings
 root.buttons(awful.util.table.join(

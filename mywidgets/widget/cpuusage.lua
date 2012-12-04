@@ -34,7 +34,7 @@ widget_pcpu.new = function (args)
         if self.state then
             usage = usage + 1 - (new_state.idle - self.state.idle) / (new_state.total - self.state.total)
         end
-        ret.widget:set_markup(string.format(' ☢<span color="%s">% 3d%%</span>',
+        ret.widget:set_markup(string.format('<span color="%s">% 3d%%</span>',
                     utils.gradient("#50EC50", "#EC3030", 0, 1, usage), usage * 100))
         self.state = new_state
     end
