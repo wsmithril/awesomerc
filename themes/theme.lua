@@ -1,9 +1,12 @@
 -- Nice and Clean awesome theme
 -- By Blazeix, based off of ghost1227's openbox theme.
 
+local awful = require("awful")
+
 theme = {}
 theme.theme_dir = awful.util.getdir("config") .. "/themes"
-theme.wallpaper_cmd = { "awsetbg " .. theme.theme_dir .. "/background.png" }
+theme.wallpaper = theme.theme_dir .. "/background.png"
+theme.wallpaper_cmd = { "awsetbg " .. theme.wallpaper }
 
 theme.font          = "Yahei Mono 10"
 
@@ -22,9 +25,6 @@ theme.border_normal = "#000000"
 theme.border_focus  = "#535d6c"
 theme.border_marked = "#91231c"
 
-theme.titlebar_bg = "#4e7aa7"
-theme.titlebar_fg = "#ffffff"
-
 -- There are other variable sets
 -- overriding the default one when
 -- defined, the sets are:
@@ -35,6 +35,12 @@ theme.titlebar_fg = "#ffffff"
 -- Example:
 --theme.taglist_bg_focus = "#ff0000"
 
+-- titlebar
+theme.titlebar_bg_focus  = "#4e7aa7"
+theme.titlebar_fg_focus  = "#ffffff"
+theme.titlebar_bg_normal = "#4e7aa7"
+theme.titlebar_fg_normal = "#ffffff"
+
 -- tooltip
 theme.tooltip_fg_color = theme.fg_normal
 theme.tooltip_bg_color = theme.bg_normal
@@ -44,7 +50,6 @@ theme.tooltip_border_color = theme.bg_color
 -- Display the taglist squares
 theme.taglist_squares_sel   = theme.theme_dir .. "/taglist/squarefw.png"
 theme.taglist_squares_unsel = theme.theme_dir .. "/taglist/squarew.png"
-
 theme.tasklist_floating_icon = theme.theme_dir .. "/tasklist/floating.png"
 
 -- Variables set for theming the menu:
