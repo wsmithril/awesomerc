@@ -26,9 +26,9 @@ function control.control(action, sID)
     elseif action == "unmute" then
         return tonumber(string.match(run_and_wait("amixer sset " .. l_sID .. " unmute"), vol_pattern))
     elseif action == "up" then
-        return tonumber(string.match(run_and_wait("amixer sset " .. l_sID .. " 10%+"), vol_pattern))
+        return tonumber(string.match(run_and_wait("amixer sset " .. l_sID .. " 10%+ on"), vol_pattern))
     elseif action == "down" then
-        return tonumber(string.match(run_and_wait("amixer sset " .. l_sID .. " 10%-"), vol_pattern))
+        return tonumber(string.match(run_and_wait("amixer sset " .. l_sID .. " 10%- on"), vol_pattern))
     elseif action == "toogle" then
         local status = control.control("status", l_sID)
         return control.control(status ~= "off" and "mute" or "unmute", l_sID)
