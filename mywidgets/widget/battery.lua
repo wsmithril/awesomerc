@@ -29,6 +29,7 @@ local power_stat = function(dev)
     ret.drain    = tonumber(bat.current_now or bat.power_now)
     ret.full     = tonumber(bat.energy_full or bat.charge_full)
     ret.now      = tonumber(bat.energy_now  or bat.charge_now)
+    ret.precent  = tonumber(bat.capacity or "0")
     return ret
 end
 
@@ -46,10 +47,10 @@ battery.new = function(args)
     ret.updater = function(self)
         local stats = power_stat(self.dev)
         local text = ""
-        if stats or stats.status == "Unknown\n" then
-            text = string.format("% 2d%%", math.min(math.floor(stats.now / stats.full * 100), 100))
-            if stats.status ~= "Charged\n" and stats.status ~= "Full\n" then
-                text = text .. battery_state[stats.status]
+        if stats then
+            text = string.format("% 2d%%", stats.precent)
+            if stats.status ~= "Charged\n" and stats.status ~= "Full\n" and stats.drain ~= 0 then
+                text = text .. " " .. battery_state[stats.status]
                 if stats.status == "Charging\n" then
                     text = text .. string.format("%02d:%02d", m2hm((stats.full - stats.now) / stats.drain))
                 else
