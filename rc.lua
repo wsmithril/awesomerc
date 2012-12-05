@@ -178,7 +178,7 @@ widget_tasklist.buttons = awful.util.table.join(
     end))
 -- }}}
 
--- {{{ buttions for tasklist
+-- {{{ buttions for taglist
 widget_taglist = {}
 widget_taglist.buttons = awful.util.table.join(
     awful.button({ }, 1, awful.tag.viewonly)
