@@ -15,16 +15,11 @@ class weather_provider(object):
         raise Exception
 
 def degree_NESW(d):
-    # wind direction to NSWE notion
-    d1  = "NESW"[(d + 46) / 90 % 4]
-    d2  = "NESW"[(d + 23) / 90 % 4]
-    d3  = "NESW"[(d + 12) / 90 % 4]
-    if (d1 == d2 and d2 == d3):
-        return d1
-    elif (d2 == d3):
-        return d1 + d2
-    else:
-        return d1 + d2 + d3
+    # wind direction to compass direction
+    return ["N", "NNE", "NE", "ENE",
+            "E", "ESE", "SE", "SSE",
+            "S", "SSW", "SW", "WSW",
+            "W", "WNW", "NW", "NNW"][int((d + 360.0 / 32) % 360 / (360.0 / 16))]
 
 class yahoo_weather(weather_provider):
     url = "http://weather.yahooapis.com/forecastrss?u=c&w="
