@@ -48,7 +48,7 @@ beautiful.init(awful.util.getdir("config") .. "/themes/theme.lua")
 
 -- Default toolkits
 local tools = {
-    terminal = "sakura"
+    terminal = "lilyterm"
   , editor   = "gvim"}
 
 -- modkey
@@ -351,7 +351,6 @@ clientkeys = awful.util.table.join(
         end)
   , awful.key({ modkey }, "Up", function (c)
       c.maximized_vertical = not c.maximized_vertical
-      awful.titlebar.remove(c)
     end)
 
 )
@@ -441,14 +440,15 @@ awful.rules.rules = {
   , { rule       = { class = "Pidgin", role = "conversation" },
       properties = { maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 },
       callback   = awful.client.setslave }
-    -- sakura terminal
+    -- Terminals
   , { rule = { class = "Sakura" }, properties = { opacity = 0.9, floating = true }}
+  , { rule = { class = "LilyTerm" }, properties = { opacity = 0.9, floating = true }}
     -- Flash Full screen
-  , { rule = { class = "Plugin-container"}, properties = {fullscreen = true } }
+  , { rule = { class = "Plugin-container" }, properties = {fullscreen = true } }
     -- Deadbeef
   , { rule = {class = "Deadbeef" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
-  , { rule = {class = "Transmission-gtk" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
-  , { rule = { class = "Guake" }, properties = { floating = true} }
+  , { rule = {class = "Transmission-gtk", role = "tr-main" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
+  , { rule = {class = "Guake" }, properties = { floating = true} }
 }
 -- }}}
 
