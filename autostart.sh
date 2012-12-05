@@ -1,5 +1,7 @@
 #! /bin/bash
 
+[ x$AWESOME_TEST != x ] && exit
+
 config_dir=$HOME/.config/awesome
 lockfile_dir=/tmp/awesome-autostart
 
