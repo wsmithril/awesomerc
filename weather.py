@@ -1,5 +1,5 @@
 #! /usr/bin/python
-# -*- coding: utf-8 -*-
+# -*- coding=utf-8 -*-
 
 import urllib, sys
 from xml.dom.minidom import parse
@@ -45,10 +45,10 @@ class yahoo_weather(weather_provider):
 
         resp["wind dire"] = degree_NESW(int(resp["wind dire"]))
 
-        return "\n".join([
+        return ("\n".join([
             " " + resp["location"] + " " + resp["condition"],
-            "Temperature: " + resp["temp"],
-            "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ])
+            "Temperature: " + resp["temp"] + u"°C",
+            "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ])).encode("UTF-8")
 
 
 if __name__ == "__main__":
