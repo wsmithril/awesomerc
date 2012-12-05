@@ -1,4 +1,6 @@
 -- my widgets
+local capi = { timer = timer }
+
 -- requires
 local base = require("wibox.widget.base")
 
