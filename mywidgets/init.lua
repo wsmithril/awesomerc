@@ -2,10 +2,6 @@
 -- requires
 local base = require("wibox.widget.base")
 
--- Enviroments
-local os   = { time  = os.time }
-local capi = { timer = timer }
-
 -- Module
 local mywidgets = {}
 
