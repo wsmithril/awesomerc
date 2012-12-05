@@ -1,7 +1,6 @@
 -- Mudule
 local utils = {}
 
--- {{{ usful functions
 utils.id = function(x) return x end
 
 function utils.all(f, x, ...)
@@ -60,6 +59,21 @@ function utils.gradient(color1, color2, min, max, value)
 
     return string.format("#%02x%02x%02x", r1, b1, g1)
 end
--- }}}
+
+-- most of this is stolen from vicious library
+function utils.fstab(dir)
+    return setmetatable({ _path = dir}, {
+        __index = function(table, index)
+            local path = table._path .. "/" .. index
+            local fd   = io.open(path)
+            if fd then
+                local str = fd:read("*all")
+                fd:close()
+                if str then return str else
+                    return setmetatable({ _path = path}, getmetatable(table))
+                end
+            end
+        end})
+ end
 
 return utils

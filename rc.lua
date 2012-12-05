@@ -132,7 +132,7 @@ local widget_cpuuse   = mywidgets.new({ type = "cpuusage", update = 3, name = "c
 local widget_cputemp  = mywidgets.new({ type = "cputemp",  update = 3, name = "temperature" })
 local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol", device = "Master" })
-
+local widget_battery  = mywidgets.new({ type = "battery",  name = "battery", device = "BAT0" })
 -- icons
 local widget_cpu_icon = wibox.widget.imagebox()
 widget_cpu_icon:set_image(awful.util.getdir("config") .. "/themes/cpu.png")
@@ -226,6 +226,9 @@ for s = 1, screen.count() do
     top_left:add(widget_weather)
     top_left:add(mywidgets.seperator.right)
     top_middle:add(widget_promptbox[s])
+    top_right:add(mywidgets.seperator.left)
+    top_right:add(widget_battery)
+    top_right:add(mywidgets.seperator.right)
     top_right:add(mywidgets.seperator.left)
     top_right:add(widget_volumn)
     top_right:add(mywidgets.seperator.right)
