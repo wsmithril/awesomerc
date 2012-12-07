@@ -68,6 +68,13 @@ mywidgets.decorate = function(widget, args)
     end
     d:add(widget)
     if dec then d:add(seperator.right) end
+    
+    -- pass all set_.+ function in widget to d
+    for name, func in pairs(widget) do
+        if name:match("set_.*") then 
+            d[name] = function(self, ...) return func(widget, ...) end
+        end
+    end
     return d
 end
 
