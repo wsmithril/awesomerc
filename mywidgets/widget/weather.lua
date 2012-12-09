@@ -21,15 +21,12 @@ weather.new = function(args)
     ret.widget  = wibox.widget.textbox()
     ret.tooltip = awful.tooltip({ objects = { ret.widget }})
     ret.updater = function(self)
-        local str = run_and_wait("python " .. awful.util.getdir("config") .. "/weather.py " .. self.city)
-        if resp ~= "None" then
-            self.widget:set_text("Outdoor:" .. (str:match("Temperature: (-?%d+)%D*") or "N/A") ..  "°C")
-            self.tooltip:set_text(str)
-        else
-            self.widget:set_text("Outdoor:N/A")
-            self.tooltip:set_text("Fail to get weather")
-        end
+        local str = awful.util.spawn("python " .. awful.util.getdir("config") .. "/weather.py " .. self.city)
+        self.widget:set_text("Outdoor:...")
+        self.tooltip:set_text("Getting Weather information")
     end
+    globals.widget_weather  = ret.widget
+    globals.tooltip_weather = ret.tooltip
     return ret
 end
 

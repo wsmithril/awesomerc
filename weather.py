@@ -3,6 +3,7 @@
 
 import urllib, sys
 from xml.dom.minidom import parse
+import subprocess
 
 class weather_provider(object):
     def __init__(self, city_id = None):
@@ -20,6 +21,10 @@ def degree_NESW(d):
             "E", "ESE", "SE", "SSE",
             "S", "SSW", "SW", "WSW",
             "W", "WNW", "NW", "NNW"][int((d + 360.0 / 32) % 360 / (360.0 / 16))]
+
+def awesome_client(code):
+    p = subprocess.Popen(["awesome-client"], stdin = subprocess.PIPE)
+    p.communicate(code.encode("UTF-8"))
 
 class yahoo_weather(weather_provider):
     url = "http://weather.yahooapis.com/forecastrss?u=c&w="
@@ -45,13 +50,15 @@ class yahoo_weather(weather_provider):
 
         resp["wind dire"] = degree_NESW(int(resp["wind dire"]))
 
-        return ("\n".join([
+        short_message = "Outdoor:%s" % resp["temp"]
+        long_message = ("\\n".join([
             " " + resp["location"] + " " + resp["condition"],
             "Temperature: " + resp["temp"] + u"°C",
-            "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ])).encode("UTF-8")
-
+            "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ]))
+        awesome_client('globals.widget_weather:set_text("' + short_message + u'°C")')
+        awesome_client('globals.tooltip_weather:set_text("' + long_message + '")')
 
 if __name__ == "__main__":
     w = yahoo_weather(city_id = sys.argv[1])
-    print w.get_weather()
+    w.get_weather()
 

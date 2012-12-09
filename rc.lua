@@ -1,5 +1,8 @@
 -- rc file for awesome 3.5
 
+-- object that expose to awesome-client
+globals = {}
+
 -- Awesome Library
 local awful     = require("awful")
 awful.rules     = require("awful.rules")
