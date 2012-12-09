@@ -101,11 +101,11 @@ end
 -- {{{ Menu
 local menu_main = awful.menu({
     items = {
-      { "awesome",
-        { { "Restart", awesome.restart },
-          { "Quit",    awesome.quit }},
-        beautiful.awesome_icon },
-      { "Terminal", tools.terminal }}
+        { "awesome", {
+            { "Restart", awesome.restart }
+          , { "Quit",    awesome.quit }}
+        , beautiful.awesome_icon }
+      , { "Terminal", tools.terminal }}
   , theme = { width = beautiful.menu_width, height = beautiful.menu_height }})
 
 awful.menu.menu_keys = {
@@ -133,6 +133,8 @@ local widget_cputemp  = mywidgets.new({ type = "cputemp",  update = 3, name = "t
 local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol",     device = "Master" })
 local widget_battery  = mywidgets.new({ type = "battery",  name = "battery", device = "BAT0" })
+local widget_scrot    = mywidgets.new({ type = "scrot",    name = "scrot", not_decorate = true })
+
 -- }}}
 
  -- {{{ wibox
@@ -146,12 +148,8 @@ widget_tasklist.buttons = awful.util.table.join(
         if c == client.focus then
             c.minimized = true
         else
-            -- Without this, the following
-            -- :isvisible() makes no sense
             c.minimized = false
             if not c:isvisible() then awful.tag.viewonly(c:tags()[1]) end
-            -- This will also un-minimize
-            -- the client, if needed
             client.focus = c
             c:raise()
         end
@@ -161,7 +159,9 @@ widget_tasklist.buttons = awful.util.table.join(
             instance:hide()
             instance = nil
         else
-            instance = awful.menu.clients({theme = {width = 250}})
+            instance = awful.menu.clients(awful.menu.new({
+                items = {}
+              , theme = {width = 250}}))
         end
     end)
   , awful.button({ }, 4, function ()
@@ -213,8 +213,8 @@ for s = 1, screen.count() do
     local top_middle = wibox.layout.flex.horizontal()
     top_left:add(widget_mainlauncher)
     top_left:add(mywidgets.decorate(widget_textclock))
-    top_left:add(widget_netstats)
     top_left:add(widget_weather)
+    top_left:add(widget_netstats)
     top_middle:add(widget_promptbox[s])
     top_right:add(widget_battery)
     top_right:add(widget_volumn)
@@ -222,6 +222,7 @@ for s = 1, screen.count() do
     top_right:add(widget_cpuuse)
     top_right:add(widget_cputemp)
     top_right:add(mywidgets.seperator.right)
+    top_right:add(widget_scrot)
 
     local top = wibox.layout.align.horizontal()
     top:set_left(top_left)
