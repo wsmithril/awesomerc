@@ -133,7 +133,6 @@ local widget_cputemp  = mywidgets.new({ type = "cputemp",  update = 3, name = "t
 local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol",     device = "Master" })
 local widget_battery  = mywidgets.new({ type = "battery",  name = "battery", device = "BAT0" })
-local widget_scrot    = mywidgets.new({ type = "scrot",    name = "scrot", not_decorate = true })
 
 -- }}}
 
@@ -222,7 +221,6 @@ for s = 1, screen.count() do
     top_right:add(widget_cpuuse)
     top_right:add(widget_cputemp)
     top_right:add(mywidgets.seperator.right)
-    top_right:add(widget_scrot)
 
     local top = wibox.layout.align.horizontal()
     top:set_left(top_left)
@@ -310,6 +308,16 @@ globalkeys = awful.util.table.join(
   , awful.key({}, "XF86AudioRaiseVolume", function() utils.volumn.up("Master", widget_volumn)     end)
     -- lock screen
   , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("slock") end)
+    -- take screen shot
+  , awful.key({}, "Print", function() 
+        naughty.notify({
+            preset  = naughty.config.presets.normal 
+          , title   = "Scrot"
+          , text    = "Taking screenshot in 5 sec"
+          , timeout = 3})
+        local filename = os.getenv("HOME") .. "/Pictures/awesome-screen-" .. os.date("%Y%m%d%H%M%S") .. ".png"
+        awful.util.spawn("scrot -d 5 " .. filename)
+    end)
 )
 
 clientkeys = awful.util.table.join(
