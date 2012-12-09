@@ -36,27 +36,28 @@ class yahoo_weather(weather_provider):
     def get_weather(self):
         try:
             dom = parse(urllib.urlopen(self._get_url()))
+
+            resp = {}
+
+            resp["location"]   = dom.getElementsByTagNameNS(self.ns, 'location')[0].getAttribute('city')
+            resp["condition"]  = dom.getElementsByTagNameNS(self.ns, 'condition')[0].getAttribute('text')
+            resp["temp"]       = dom.getElementsByTagNameNS(self.ns, 'condition')[0].getAttribute('temp')
+            resp["time"]       = dom.getElementsByTagNameNS(self.ns, 'condition')[0].getAttribute('date')
+            resp["wind speed"] = dom.getElementsByTagNameNS(self.ns, 'wind')[0].getAttribute('speed')
+            resp["wind dire"]  = dom.getElementsByTagNameNS(self.ns, 'wind')[0].getAttribute('direction')
+
+            resp["wind dire"] = degree_NESW(int(resp["wind dire"]))
+
+            short_message = "Outdoor:%s" % resp["temp"]
+            long_message = ("\\n".join([
+                " " + resp["location"] + " " + resp["condition"],
+                "Temperature: " + resp["temp"] + u"°C",
+                "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ]))
+            awesome_client('globals.widget_weather:set_text("' + short_message + u'°C")')
+            awesome_client('globals.tooltip_weather:set_text("' + long_message + '")')
         except Exception as e:
-            return "None"
-
-        resp = {}
-
-        resp["location"]   = dom.getElementsByTagNameNS(self.ns, 'location')[0].getAttribute('city')
-        resp["condition"]  = dom.getElementsByTagNameNS(self.ns, 'condition')[0].getAttribute('text')
-        resp["temp"]       = dom.getElementsByTagNameNS(self.ns, 'condition')[0].getAttribute('temp')
-        resp["time"]       = dom.getElementsByTagNameNS(self.ns, 'condition')[0].getAttribute('date')
-        resp["wind speed"] = dom.getElementsByTagNameNS(self.ns, 'wind')[0].getAttribute('speed')
-        resp["wind dire"]  = dom.getElementsByTagNameNS(self.ns, 'wind')[0].getAttribute('direction')
-
-        resp["wind dire"] = degree_NESW(int(resp["wind dire"]))
-
-        short_message = "Outdoor:%s" % resp["temp"]
-        long_message = ("\\n".join([
-            " " + resp["location"] + " " + resp["condition"],
-            "Temperature: " + resp["temp"] + u"°C",
-            "Wind: " + resp["wind speed"] + "km/h " + resp["wind dire"] ]))
-        awesome_client('globals.widget_weather:set_text("' + short_message + u'°C")')
-        awesome_client('globals.tooltip_weather:set_text("' + long_message + '")')
+            awesome_client('globals.widget_weather:set_text("Outdoor:N/A")')
+            awesome_client('globals.widget_tooltip_weather:set_text("Fail to retrive weather info")')
 
 if __name__ == "__main__":
     w = yahoo_weather(city_id = sys.argv[1])
