@@ -8,7 +8,7 @@ local wibox = require("wibox")
 local utils = require("mywidgets.utils")
 
 local battery_state = {
-    ["Full\n"]        = "↯",
+    ["Full\n"]        = "⚡",
     ["Unknown\n"]     = "⌁",
     ["Charged\n"]     = "↯",
     ["Charging\n"]    = "+",
@@ -60,7 +60,7 @@ battery.new = function(args)
                 text = battery_state[stats.status] .. text
             end
         else
-            text = "N/A"
+            text = "on AC"
         end
         self.widget:set_markup(text)
     end

@@ -14,7 +14,7 @@ mywidgets.widget_list = widgets
 mywidgets.update = function()
     local ts = os.time()
     for name, w in pairs(widgets) do
-        if w.update and w.updater and ts % w.update == 0 then
+        if w.update and w.update > 0 and w.updater and ts % w.update == 0 then
             w:updater()
         end
     end

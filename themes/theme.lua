@@ -56,7 +56,7 @@ theme.tasklist_floating_icon = theme.theme_dir .. "/tasklist/floating.png"
 -- menu_[border_color|border_width]
 theme.menu_submenu_icon = theme.theme_dir .. "/submenu.png"
 theme.menu_height = "18"
-theme.menu_width  = "110"
+theme.menu_width  = "120"
 theme.menu_border_width = "0"
 
 -- You can add as many variables as
@@ -104,7 +104,5 @@ theme.layout_spiral  = theme.theme_dir .. "/layouts/spiralw.png"
 theme.layout_dwindle = theme.theme_dir .. "/layouts/dwindlew.png"
 
 theme.awesome_icon = theme.theme_dir .. "/awesome64.png"
-
-theme.net_widget_icon = theme.theme_dir .. "/icons/net.png"
 
 return theme

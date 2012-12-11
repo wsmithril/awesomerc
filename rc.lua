@@ -7,14 +7,12 @@ globals = {}
 local awful     = require("awful")
 awful.rules     = require("awful.rules")
 awful.autofocus = require("awful.autofocus")
-local beautiful = require("beautiful")  -- Theme
 local wibox     = require("wibox")      -- Widget and layouts
 local menubar   = require("menubar")    -- menubar
 local lfs       = require("lfs")        -- Lua filesystem
 local gears     = require("gears")
 local utils     = require("utils")
-
-naughty = require("naughty")    -- Notifications
+local naughty   = require("naughty")    -- Notifications
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -46,8 +44,10 @@ end
 -- locale
 os.setlocale("zh_CN.utf-8")
 
--- Theming
+-- {{{ Theme
+beautiful = require("beautiful")  -- Theme. This should be global
 beautiful.init(awful.util.getdir("config") .. "/themes/theme.lua")
+-- }}}
 
 -- Default toolkits
 local tools = {
@@ -124,6 +124,7 @@ local widget_mainlauncher = awful.widget.launcher({
   , menu  = menu_main})
 
 menubar.utils.terminal = tools.terminal
+menubar.utils.icon_theme = 'elementary'
 -- }}}
 
 -- {{{ My own widgets
@@ -321,6 +322,7 @@ globalkeys = awful.util.table.join(
         local filename = os.getenv("HOME") .. "/Pictures/awesome-screen-" .. os.date("%Y%m%d%H%M%S") .. ".png"
         awful.util.spawn("scrot -d 5 " .. filename)
     end)
+  , awful.key({ modkey }, "p", function() menubar.show() end)
 )
 
 clientkeys = awful.util.table.join(
@@ -468,7 +470,7 @@ client.connect_signal("manage", function (c, startup)
     c:connect_signal("property::maximized_horizontal", hide_titlebar)
 ]]
 
-     if not startup and awful.client.floating.get(c) then
+     if not startup and awful.client.floating.get(c) and c.type == "normal"  then
          awful.client.setslave(c)
          awful.placement.no_overlap(c)
          awful.placement.no_offscreen(c)
