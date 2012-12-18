@@ -11,11 +11,18 @@ local mywidgets = {}
 local widgets = {}
 mywidgets.widget_list = widgets
 
+if globals then
+    globals.update_now = {}
+end
+
 mywidgets.update = function()
     local ts = os.time()
     for name, w in pairs(widgets) do
         if w.update and w.update > 0 and w.updater and ts % w.update == 0 then
             w:updater()
+        elseif globals.update_now[name] then
+            w:updater()
+            globals.update_now[name] = nil
         end
     end
 end

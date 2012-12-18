@@ -12,7 +12,8 @@ local menubar   = require("menubar")    -- menubar
 local lfs       = require("lfs")        -- Lua filesystem
 local gears     = require("gears")
 local utils     = require("utils")
-local naughty   = require("naughty")    -- Notifications
+
+naughty   = require("naughty")    -- Notifications
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -137,7 +138,7 @@ local widget_cputemp  = mywidgets.new({ type = "cputemp",  update = 3, name = "t
 local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol",     device = "Master" })
 local widget_battery  = mywidgets.new({ type = "battery",  name = "battery", device = "BAT0" })
-
+local widget_mount    = mywidgets.new({ type = "mount",    name = "mount" })
 -- }}}
 
  -- {{{ wibox
@@ -215,6 +216,7 @@ for s = 1, screen.count() do
     local top_right  = wibox.layout.fixed.horizontal()
     local top_middle = wibox.layout.flex.horizontal()
     top_left:add(widget_mainlauncher)
+    top_left:add(widget_mount)
     top_left:add(mywidgets.decorate(widget_textclock))
     top_left:add(widget_weather)
     top_left:add(widget_netstats)
@@ -310,6 +312,8 @@ globalkeys = awful.util.table.join(
   , awful.key({}, "XF86AudioMute",        function() utils.volumn.toogle("Master", widget_volumn) end)
   , awful.key({}, "XF86AudioLowerVolume", function() utils.volumn.down("Master", widget_volumn)   end)
   , awful.key({}, "XF86AudioRaiseVolume", function() utils.volumn.up("Master", widget_volumn)     end)
+    -- Mute Micro on thinkpad. Needs patch kerresolv.c with patch-XF86XK_AudioMute.patch
+  , awful.key({}, "XF86AudioMicMute",     function() utils.volumn.toogle("Capture") print("MicMute") end)
     -- lock screen
   , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("slock") end)
     -- take screen shot
