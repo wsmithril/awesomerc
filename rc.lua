@@ -435,7 +435,7 @@ awful.rules.rules = {
       callback   = awful.client.setslave }
     -- Terminals
   , { rule = { class = "Sakura" }, properties = { opacity = 0.9, floating = true }}
-  , { rule = { class = "LilyTerm" }, properties = { opacity = 0.9, floating = true }}
+  , { rule = { class = "LilyTerm" }, properties = { opacity = 0.85, floating = true }}
     -- Flash Full screen
   , { rule = { class = "Plugin-container" }, properties = {fullscreen = true } }
     -- Deadbeef
