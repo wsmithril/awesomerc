@@ -94,6 +94,8 @@ M.new = function(args)
         awful.button({ }, 3, function() ret.menu:toggle() end)
       , awful.button({ }, 1, function() ret.menu:toggle() end)))
     ret.updater = function(self)
+        if self.menu then self.menu:hide() end
+        self.menu = nil
         self.menu = make_menu(udisks.list_devices())
     end
     return ret
