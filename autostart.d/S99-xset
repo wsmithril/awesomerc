@@ -1,0 +1,5 @@
+#! /bin/bash
+[ x"$1" == "xstart" ] && {
+    xsetroot -cursor_name Adwaita
+    xset dpms 0 0 600 s off
+}

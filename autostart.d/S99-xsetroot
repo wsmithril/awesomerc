@@ -1,2 +1,0 @@
-#! /bin/bash
-[ x"$1" == "xstart" ] && xsetroot -cursor_name Adwaita
