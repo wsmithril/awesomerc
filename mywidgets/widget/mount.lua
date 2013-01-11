@@ -40,7 +40,7 @@ local make_entry = function(info)
     -- add Actions to sub_menu
     if device_type == "hdd" then
         -- device not removable
-        table.insert(sub_menu, { "DO NOT TOUCH", nil, icons.no })
+        table.insert(sub_menu, { "DO NOT UNMOUNT", nil, icons.no })
     else
         if info["is mounted"] == "1" then
             table.insert(sub_menu, { "Unmount", "udisks --unmount " .. device, icons.eject })

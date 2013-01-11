@@ -315,7 +315,7 @@ globalkeys = awful.util.table.join(
     -- Mute Micro on thinkpad. Needs patch kerresolv.c with patch-XF86XK_AudioMute.patch
   , awful.key({}, "XF86AudioMicMute",     function() utils.volumn.toogle("Capture") print("MicMute") end)
     -- lock screen
-  , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("slock -o 1.0 -e") end)
+  , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("slock") end)
     -- take screen shot
   , awful.key({}, "Print", function() 
         naughty.notify({
