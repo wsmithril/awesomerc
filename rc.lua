@@ -306,8 +306,8 @@ globalkeys = awful.util.table.join(
                       awful.util.eval, nil,
                       awful.util.getdir("cache") .. "/history_eval")
               end)
-    -- start nautilus
-  , awful.key({ modkey }, "e", function () awful.util.spawn("nautilus --no-desktop") end)
+    -- start nemo
+  , awful.key({ modkey }, "e", function () awful.util.spawn("nemo --no-desktop") end)
     -- media keys
   , awful.key({}, "XF86AudioMute",        function() utils.volumn.toogle("Master", widget_volumn) end)
   , awful.key({}, "XF86AudioLowerVolume", function() utils.volumn.down("Master", widget_volumn)   end)
@@ -315,7 +315,7 @@ globalkeys = awful.util.table.join(
     -- Mute Micro on thinkpad. Needs patch kerresolv.c with patch-XF86XK_AudioMute.patch
   , awful.key({}, "XF86AudioMicMute",     function() utils.volumn.toogle("Capture") print("MicMute") end)
     -- lock screen
-  , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("slock") end)
+  , awful.key({ modkey }, "BackSpace", function () awful.util.spawn("wslock") end)
     -- take screen shot
   , awful.key({}, "Print", function() 
         naughty.notify({
