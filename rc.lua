@@ -475,9 +475,11 @@ client.connect_signal("manage", function (c, startup)
 ]]
 
      if not startup and awful.client.floating.get(c) and c.type == "normal"  then
-         awful.client.setslave(c)
-         awful.placement.no_overlap(c)
-         awful.placement.no_offscreen(c)
+        if not c.size_hints.user_position and not c.size_hints.program_position then
+            awful.client.setslave(c)
+            awful.placement.no_overlap(c)
+            awful.placement.no_offscreen(c)
+        end
     end
 end)
 -- }}}
