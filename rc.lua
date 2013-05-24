@@ -132,16 +132,17 @@ menubar.utils.icon_theme = 'elementary'
 
 local mywidgets = require("mywidgets")
 
-local widget_netstats = mywidgets.new({ type = "netstats", update = 3, name = "net" })
+local widget_netstats = mywidgets.new({ type = "netstats", update = 3, name = "net", rx_max = 1024 * 1.4})
 local widget_cpuuse   = mywidgets.new({ type = "cpuusage", update = 3, name = "cpu", icon = awful.util.getdir("config") .. "/themes/cpu.png", not_decorate = true})
 local widget_cputemp  = mywidgets.new({ type = "cputemp",  update = 3, name = "temperature", not_decorate = true })
 local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol",     device = "Master" })
 local widget_battery  = mywidgets.new({ type = "battery",  name = "battery", device = "BAT0" })
 local widget_mount    = mywidgets.new({ type = "mount",    name = "mount" })
--- }}}
+-- local widget_keyboard = mywidgets.new({ type = "keyboard", name
+--= "kbswitch"}) }}}
 
- -- {{{ wibox
+-- {{{ wibox
 widget_textclock = awful.widget.textclock("%Y-%m-%d %A %H:%M", 15) -- textclock
 widget_systray   = wibox.widget.systray()   -- systray
 
@@ -221,6 +222,7 @@ for s = 1, screen.count() do
     top_left:add(widget_weather)
     top_left:add(widget_netstats)
     top_middle:add(widget_promptbox[s])
+--    top_right:add(widget_keyboard)
     top_right:add(widget_battery)
     top_right:add(widget_volumn)
     top_right:add(mywidgets.seperator.left)
@@ -485,7 +487,7 @@ end)
 -- }}}
 
 -- {{{ autostart
-awful.util.spawn_with_shell(awful.util.getdir("config") .. "/autostart.sh start")
+awful.util.spawn(awful.util.getdir("config") .. "/autostart.sh start")
 -- }}}
 
 -- {{{ autostop

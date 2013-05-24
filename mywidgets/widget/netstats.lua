@@ -38,21 +38,21 @@ end
 
 function widget_netstat.new(arg)
     local ret = {}
-    ret.widget  = wibox.widget.textbox()
-    ret.update  = arg.update or 3
+    ret.widget = wibox.widget.textbox()
+    ret.update = arg.update or 3
+    ret.rx_max = (arg.rx_max or 360) * 1024
+    ret.tx_max = (arg.tx_max or 100) * 1024
     ret.updater = function(self)
         local text = ""
         local line, rx, tx
-        local rx_max = 360 * 1024
-        local tx_max = 100 * 1024
         local s = net_status()
         if self.stats == nil then self.stats = s end
         for k, v in pairs(s) do
             if v.status == "up" then
                 rx = self.stats[k] and (v.rx - self.stats[k].rx) / self.update or 0
                 tx = self.stats[k] and (v.tx - self.stats[k].tx) / self.update or 0
-                line = "✓" .. k .. ' <span color="' .. utils.gradient("#e0e0e0", "#3030EC", 0, tx_max, tx) .. '">' .. utils.format_byte(tx, "sub") .. '</span>'
-                                .. '⇅<span color="' .. utils.gradient("#e0e0e0", "#EC3030", 0, rx_max, rx) .. '">' .. utils.format_byte(rx, "sub") .. '</span>'
+                line = "✓" .. k .. ' <span color="' .. utils.gradient("#e0e0e0", "#3030EC", 0, ret.tx_max, tx) .. '">' .. utils.format_byte(tx, "sub") .. '</span>'
+                                .. '⇅<span color="' .. utils.gradient("#e0e0e0", "#EC3030", 0, ret.rx_max, rx) .. '">' .. utils.format_byte(rx, "sub") .. '</span>'
             else
                 line = nil
             end
