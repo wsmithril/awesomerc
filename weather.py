@@ -57,7 +57,7 @@ class yahoo_weather(weather_provider):
             awesome_client('globals.tooltip_weather:set_text("' + long_message + '")')
         except Exception as e:
             awesome_client('globals.widget_weather:set_text("Outdoor:N/A")')
-            awesome_client('globals.widget_tooltip_weather:set_text("Fail to retrive weather info")')
+            awesome_client('globals.tooltip_weather:set_text("Fail to retrive weather info")')
 
 if __name__ == "__main__":
     w = yahoo_weather(city_id = sys.argv[1])
