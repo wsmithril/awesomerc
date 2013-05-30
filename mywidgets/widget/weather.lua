@@ -21,9 +21,9 @@ weather.new = function(args)
     ret.widget  = wibox.widget.textbox()
     ret.tooltip = awful.tooltip({ objects = { ret.widget }})
     ret.updater = function(self)
-        local str = awful.util.spawn("python " .. awful.util.getdir("config") .. "/weather.py " .. self.city)
         self.widget:set_text("Outdoor:...")
         self.tooltip:set_text("Getting Weather information")
+        local str = awful.util.spawn("python " .. awful.util.getdir("config") .. "/weather.py " .. self.city)
     end
     globals.widget_weather  = ret.widget
     globals.tooltip_weather = ret.tooltip

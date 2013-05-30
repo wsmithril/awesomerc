@@ -139,8 +139,9 @@ local widget_weather  = mywidgets.new({ type = "weather",  name = "weather" })
 local widget_volumn   = mywidgets.new({ type = "volumn",   name = "vol",     device = "Master" })
 local widget_battery  = mywidgets.new({ type = "battery",  name = "battery", device = "BAT0" })
 local widget_mount    = mywidgets.new({ type = "mount",    name = "mount" })
--- local widget_keyboard = mywidgets.new({ type = "keyboard", name
---= "kbswitch"}) }}}
+local widget_keyboard = mywidgets.new({ type = "keyboard", name = "kbswitch"})
+
+-- }}}
 
 -- {{{ wibox
 widget_textclock = awful.widget.textclock("%Y-%m-%d %A %H:%M", 15) -- textclock
@@ -221,8 +222,8 @@ for s = 1, screen.count() do
     top_left:add(mywidgets.decorate(widget_textclock))
     top_left:add(widget_weather)
     top_left:add(widget_netstats)
+    top_left:add(widget_keyboard)
     top_middle:add(widget_promptbox[s])
---    top_right:add(widget_keyboard)
     top_right:add(widget_battery)
     top_right:add(widget_volumn)
     top_right:add(mywidgets.seperator.left)
