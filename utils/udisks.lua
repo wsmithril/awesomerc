@@ -35,6 +35,7 @@ m.list_devices = function()
         local device_file = line:match('%s*device%-file:%s*(.*)$')
         if device_file then table.insert(ret, device_file) end
     end
+    fd:close()
     return ret
 end
 
