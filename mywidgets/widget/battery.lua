@@ -41,11 +41,11 @@ end
 
 battery.new = function(args)
     local ret = {}
-    ret.dev     = args.dec or "BAT0"
+    local dev   = args.dec or "BAT0"
     ret.update  = args.update or 5
     ret.widget  = wibox.widget.textbox()
     ret.updater = function(self)
-        local stats = power_stat(self.dev)
+        local stats = power_stat(dev)
         local text = ""
         if stats then
             text = string.format("% 2d%%", stats.precent)

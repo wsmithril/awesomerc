@@ -21,12 +21,13 @@ local list_all_kb = function()
     local fd = io.popen("xinput")
     for l in fd:lines() do
         line = string.gsub(l, '"', "")
-        if string.match(line, "keyboard") and
+        if string.match(line, "keyboard.*id=") and
            not string.match(line, "[Vv]irtual") then
             -- this is an actual keyboard
             local d = {}
-            d.id, d.name = string.match(line, "(%a.+)%s*id=(%d+)")
+            d.name, d.id = string.match(line, "(%a.+)%s+id=(%d+)")
             device_list[i] = d
+            i = i + 1
         end
     end
     fd:close()
@@ -43,30 +44,36 @@ end
 
 w.new = function(args)
     local ret = {}
-    ret.dev_list = list_all_kb()
-    ret.current_enable = #ret.dev_list
+    ret.widget           = wibox.widget.textbox()
+    local tooltip        = awful.tooltip({objects = {ret.widget}})
+    local dev_list       = list_all_kb()
+    local current_enable = #dev_list
+
+    for i, v in ipairs(dev_list) do
+        print (i, v.id, v.name)
+    end
 
     -- cycle enable keyboard
     local cycle = function()
         local tooltip_text = ""
         local widget_text  = ""
 
-        local enable_this = (ret.current_enable + 1) % (#ret.dev_list + 1)
+        local enable_this = (current_enable + 1) % (#dev_list + 1)
         if enable_this == 0 then 
-            for _, dev in ipairs(ret.dev_list) do enable_device(dev.id) end
+            for _, dev in ipairs(dev_list) do enable_device(dev.id) end
             widget_text = "ALL"
         else  
-            if ret.current_enable == 0 then
-                for _, dev in ipairs(ret.dev_list) do disable_device(dev.id) end
+            if current_enable == 0 then
+                for _, dev in ipairs(dev_list) do disable_device(dev.id) end
             else
-                disable_device(ret.dev_list[current_enable].id)
+                disable_device(dev_list[current_enable].id)
             end
-            enable_device(ret.dev_list[enable_this].id)
-            widget_text = ret.dev_list[enable_this].id .. " " .. ret.dev_list[enable_this].name
+            enable_device(dev_list[enable_this].id)
+            widget_text = dev_list[enable_this].id .. " " .. dev_list[enable_this].name
         end
         
         -- tooltip text
-        for i, dev in ipairs(ret.dev_list) do
+        for i, dev in ipairs(dev_list) do
             local enable = ""
             if enable_this == 0 or enable_this == id then
                 enable = "* "
@@ -77,18 +84,16 @@ w.new = function(args)
             if tooltip_text == "" then
                 tooltip_text = enable .. dev.id .. " " .. dev.name
             else
-                tooltip_text = tooltip .. "\n" ..
+                tooltip_text = tooltip_text .. "\n" ..
                                enable .. dev.id .. " " .. dev.name
             end
         end
         
         ret.widget:set_text(sym .. widget_text)
-        ret.tooltip:set_text(tooltip_text)
-        ret.current_enable = enable_this
+        tooltip:set_text(tooltip_text)
+        current_enable = enable_this
     end
 
-    ret.widget  = wibox.widget.textbox()
-    ret.tooltip = awful.tooltip({objects = {ret.widget}})
     ret.widget:buttons(awful.util.table.join(awful.button({ }, 1, cycle)))
     cycle()
     return ret

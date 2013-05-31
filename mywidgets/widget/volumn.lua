@@ -10,12 +10,12 @@ local awful  = require("awful")
 
 volumn.new = function(args)
     local ret = {}
-    ret.device = args.device or "Master"
+    device = args.device or "Master"
     ret.widget = wibox.widget.textbox()
     ret.widget:buttons(awful.util.table.join(
-        awful.button({ }, 4, function() volumn.up(ret.device, ret.widget)     end)
-      , awful.button({ }, 5, function() volumn.down(ret.device, ret.widget)   end)
-      , awful.button({ }, 1, function() volumn.toogle(ret.device, ret.widget) end)
+        awful.button({ }, 4, function() volumn.up(device, ret.widget)     end)
+      , awful.button({ }, 5, function() volumn.down(device, ret.widget)   end)
+      , awful.button({ }, 1, function() volumn.toogle(device, ret.widget) end)
     ))
 
     -- We don't have a updater here,
