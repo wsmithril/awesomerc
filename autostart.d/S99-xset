@@ -1,5 +1,7 @@
 #! /bin/bash
-[ x"$1" == "xstart" ] && {
+if [ x"$1" == "xstart" ] ; then
     xsetroot -cursor_name Adwaita
-    xset dpms 0 0 600 s off
-}
+    xset +dpms
+    xset s off
+    xset dpms 0 0 600
+fi
