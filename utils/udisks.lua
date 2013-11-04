@@ -46,6 +46,8 @@ m.get_device_type = function(info)
         return "usb"
     elseif string.match(info["device-file"], "mmcblk") then
         return "sdcard"
+    elseif string.match(info["device-file"], "loop") then
+        return "loop"
     end
     return "usb"
 end

@@ -4,9 +4,9 @@ local M = {}
 setmetatable(M, {__mode = "k"})
 
 -- requires
-local menu   = require("awful.menu")
-local udisks = require("utils.udisks")
-local awful  = require("awful")
+local menu    = require("awful.menu")
+local udisks  = require("utils.udisks")
+local awful   = require("awful")
 local textbox = require("wibox.widget.textbox")
 
 local icons = {
@@ -58,6 +58,13 @@ local function get_icon(info)
     return icons[udisks.get_device_type(info)]
 end
 
+local device_root = function(device_file)
+    return device_file:match("^(/dev/[sh]d%a+)%d*$")            or 
+           device_file:match("^(/dev/mmcblk%d+)p?%d*$")         or 
+           (device_file:match("^/dev/loop%d*$") and "Loopback") or 
+           device_file
+end
+
 -- creat the whole menu
 local make_menu = function(devices)
     local ret = {}
@@ -65,8 +72,8 @@ local make_menu = function(devices)
     for _, v in pairs(devices) do
         local info = udisks.get_device_info(v)
         local device_file = info["device-file"]
-        local root_device = device_file:match("^(/dev/[sh]d%a+)%d*$") or device_file:match("^(/dev/mmcblk%d+)p?%d*$")
-        if not device_tree[root_device] then 
+        local root_device = device_root(device_file)
+        if not device_tree[root_device] then
             device_tree[root_device] = { root_device, {}, get_icon(info) }
         end
         
