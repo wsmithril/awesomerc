@@ -19,7 +19,7 @@ function net_status()
             fd = io.open(base_dir .. '/' .. dev .. '/operstate')
             status = fd:read("*l")
             fd:close()
-            if status == "up" then
+            if status == "up" or dev == "lo" then
                 fd = io.open(base_dir .. '/' .. dev .. '/statistics/rx_bytes')
                 rx = fd:read("*l")
                 fd:close()
@@ -48,7 +48,7 @@ function widget_netstat.new(arg)
         local s = net_status()
         if self.stats == nil then self.stats = s end
         for k, v in pairs(s) do
-            if v.status == "up" then
+            if v.status == "up" or k == "lo" then
                 rx = self.stats[k] and (v.rx - self.stats[k].rx) / self.update or 0
                 tx = self.stats[k] and (v.tx - self.stats[k].tx) / self.update or 0
                 line = "✓" .. k .. ' <span color="' .. utils.gradient("#e0e0e0", "#3030EC", 0, tx_max, tx) .. '">' .. utils.format_byte(tx, "sub") .. '</span>'
