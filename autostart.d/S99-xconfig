@@ -4,4 +4,5 @@ if [ x"$1" == "xstart" ] ; then
     xset +dpms
     xset s off
     xset dpms 0 0 600
+    xcalib "/usr/share/color/icc/dispcalGUI_ThinkPad_Display_1920_2012-04-30_D6500_2.2_HQ_XYZLUT.icm"
 fi
