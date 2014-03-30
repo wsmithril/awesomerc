@@ -52,7 +52,7 @@ beautiful.init(awful.util.getdir("config") .. "/themes/theme.lua")
 
 -- Default toolkits
 local tools = {
-    terminal = "lilyterm"
+    terminal = "terminology"
   , editor   = "gvim"}
 
 -- modkey
@@ -292,7 +292,7 @@ globalkeys = awful.util.table.join(
         end)
 
     -- Standard program
-  , awful.key({ modkey,           }, "Return", function () awful.util.spawn(tools.terminal) end)
+  , awful.key({ modkey,           }, "Return", function () awful.util.spawn(tools.terminal, true) end)
   , awful.key({ modkey, "Control", "Mod1" }, "r", awesome.restart)
   , awful.key({ modkey, "Shift"   }, "q", awesome.quit)
   , awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end)
@@ -408,7 +408,7 @@ awful.rules.rules = {
     { rule = { }, properties = {
         border_width = 0
       , border_color = beautiful.border_normal
-      , focus        = true
+      , focus        = false
       , floating     = false
       , keys         = clientkeys
       , size_hints_honor = false
@@ -437,8 +437,9 @@ awful.rules.rules = {
       properties = { maximized_vertical = true , tag = tags[1][2] , width = 1920 - 1280 , x = 1280 },
       callback   = awful.client.setslave }
     -- Terminals
-  , { rule = { class = "Sakura" }, properties = { opacity = 0.9, floating = true }}
-  , { rule = { class = "LilyTerm" }, properties = { opacity = 0.85, floating = true }}
+  , { rule = { class = "Sakura" }, properties = { opacity = 0.9, floating = true, focus = true }}
+  , { rule = { class = "LilyTerm" }, properties = { opacity = 0.85, floating = true, focus = true }}
+  , { rule = { class = "terminology" }, properties = { opacity = 0.95, floating = true, focus = true }}
     -- Flash Full screen
   , { rule = { class = "Plugin-container" }, properties = {fullscreen = true } }
     -- Deadbeef
