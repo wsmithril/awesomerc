@@ -1,6 +1,5 @@
 -- CPU monitor
 -- require
-local lfs     = require("lfs")
 local wibox   = require("wibox")
 local utils   = require("mywidgets.utils")
 

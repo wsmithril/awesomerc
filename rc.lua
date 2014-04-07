@@ -9,7 +9,6 @@ awful.rules     = require("awful.rules")
 awful.autofocus = require("awful.autofocus")
 local wibox     = require("wibox")      -- Widget and layouts
 local menubar   = require("menubar")    -- menubar
-local lfs       = require("lfs")        -- Lua filesystem
 local gears     = require("gears")
 local utils     = require("utils")
 
@@ -195,6 +194,8 @@ wibox_main = {}
 widget_promptbox = {}
 widget_layoutbox = {}
 
+local topbar_height = 48
+
 for s = 1, screen.count() do
     -- prompt box
     widget_promptbox[s] = awful.widget.prompt()
@@ -212,7 +213,7 @@ for s = 1, screen.count() do
     widget_tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, widget_tasklist.buttons)
 
     -- THE wibox {{{
-    wibox_main[s] = awful.wibox({position = "top", screen = s, height = 48 })
+    wibox_main[s] = awful.wibox({position = "top", screen = s, height = topbar_height })
 
     local top_left   = wibox.layout.fixed.horizontal()
     local top_right  = wibox.layout.fixed.horizontal()
@@ -402,6 +403,12 @@ clientbuttons = awful.util.table.join(
 root.keys(globalkeys)
 -- }}}
 
+-- {{{ util functions
+local clinet_is_floating = function(c)
+    return not awful.client.floating.get(c) and not awful.layout.get(c.screen) == awful.layout.suit.floating
+end
+-- }}}
+
 -- {{{ Rules
 awful.rules.rules = {
     -- All clients will match this rule.
@@ -410,6 +417,8 @@ awful.rules.rules = {
       , border_color = beautiful.border_normal
       , focus        = false
       , floating     = false
+      , maximized_vertical   = false
+      , maximized_horizontal = false
       , keys         = clientkeys
       , size_hints_honor = false
       , buttons      = clientbuttons }
@@ -417,7 +426,11 @@ awful.rules.rules = {
             if c.name then
                 naughty.notify({ title = c.name .. " Started", presets = naughty.config.presets.normal, timeout = 2, icon = c.icon })
             end
+
+            -- if we are floating, centered new client to parent
+            if clinet_is_floating(c) then awful.placement.centered(c) end            
         end}
+
     -- Floating dialog window
   , { rule = { type = "dialog" }, properties = {floating = true },
       callback = function (c)
@@ -440,12 +453,13 @@ awful.rules.rules = {
   , { rule = { class = "Sakura" }, properties = { opacity = 0.9, floating = true, focus = true }}
   , { rule = { class = "LilyTerm" }, properties = { opacity = 0.85, floating = true, focus = true }}
   , { rule = { class = "terminology" }, properties = { opacity = 0.95, floating = true, focus = true }}
+  , { rule = {class = "Guake" }, properties = { floating = true} }
     -- Flash Full screen
   , { rule = { class = "Plugin-container" }, properties = {fullscreen = true } }
     -- Deadbeef
   , { rule = {class = "Deadbeef" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
   , { rule = {class = "Transmission-gtk", role = "tr-main" }, properties = { maximized_vertical = true , x = 920 , width = 1000 }}
-  , { rule = {class = "Guake" }, properties = { floating = true} }
+
 }
 -- }}}
 
@@ -466,6 +480,15 @@ local hide_titlebar = function(c)
     end
 end
 
+local set_not_cover_topbar = function(c)
+    if clinet_is_floating(c) then return end
+    local geo = c:geometry()
+    local to_move = topbar_height - geo.y
+    if to_move > 0 then
+        awful.client.moveresize(0, to_move, 0, 0)
+    end
+end
+
 client.connect_signal("manage", function (c, startup)
 --[[
     if (awful.client.floating.get(c)
@@ -478,14 +501,12 @@ client.connect_signal("manage", function (c, startup)
     c:connect_signal("property::maximized_horizontal", hide_titlebar)
 ]]
 
-     if not startup and awful.client.floating.get(c) and c.type == "normal"  then
-        if not c.size_hints.user_position and not c.size_hints.program_position then
-            awful.client.setslave(c)
-            awful.placement.no_overlap(c)
-            awful.placement.no_offscreen(c)
-        end
+     if not startup and awful.client.floating.get(c) and c.type == "normal" then
+        awful.placement.no_overlap(c)
+        awful.placement.no_offscreen(c)
     end
 end)
+
 -- }}}
 
 -- {{{ autostart
