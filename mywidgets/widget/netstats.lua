@@ -63,9 +63,9 @@ function M.new(arg)
     local tx_max = (arg.tx_max or 100) * 1024
     ret.old_status = {}
     ret.updater = function(self)
-        local text = ""
-        local line, rx, tx, old_status
+        local rx_bytes, tx_bytes, old_status
         local s = net_stat()
+        local lines = {}
         for dev, new_status in pairs(s) do
             if not new_status.status:find('down', 1) then
 
@@ -74,14 +74,13 @@ function M.new(arg)
                 tx_bytes = old_status and (new_status.tx_bytes - old_status.tx_bytes) / self.update or 0
                 
                 -- make test for widget
-                line = "✓" .. dev 
+                table.insert(lines, "✓" .. dev 
                         .. ' <span color="' .. utils.gradient("#e0e0e0", "#3030EC", 0, tx_max, tx_bytes) .. '">' .. utils.format_byte(tx_bytes, "sub") .. '</span>'
-                        .. '⇅<span color="' .. utils.gradient("#e0e0e0", "#EC3030", 0, rx_max, rx_bytes) .. '">' .. utils.format_byte(rx_bytes, "sub") .. '</span>'
-                if line then text = text .. (text == "" and "" or "|") .. line end
+                        .. '⇅<span color="' .. utils.gradient("#e0e0e0", "#EC3030", 0, rx_max, rx_bytes) .. '">' .. utils.format_byte(rx_bytes, "sub") .. '</span>')
             end
         end
         self.old_status = s
-        self.widget:set_markup(text)
+        self.widget:set_markup(table.concat(lines, ' | '))
     end
     return ret
 end
